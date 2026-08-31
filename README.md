@@ -1,4 +1,4 @@
-# Helinart helinart.netlify.app
+# Helinart - https://helinart.netlify.app/
 
 Helinart is a luxury nail art and nail extension platform where users can explore premium nail designs, discover artists, save favourites, and book salon appointments through an elegant modern interface.
 
