@@ -1,0 +1,128 @@
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { authService } from '../services/authService';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
+
+const AuthContext = createContext(null);
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Load session on startup
+  useEffect(() => {
+    let mounted = true;
+
+    async function initAuth() {
+      try {
+        const current = await authService.getCurrentUser();
+        if (mounted) {
+          setUser(current);
+        }
+      } catch (err) {
+        console.error('Auth initialization error', err);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    initAuth();
+
+    // Listen to Supabase Auth State changes if configured
+    let authListener = null;
+    if (isSupabaseConfigured) {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        if (session?.user) {
+          const profileUser = await authService.getCurrentUser();
+          if (mounted) setUser(profileUser);
+        } else {
+          if (mounted) setUser(null);
+        }
+      });
+      authListener = subscription;
+    }
+
+    return () => {
+      mounted = false;
+      if (authListener?.unsubscribe) {
+        authListener.unsubscribe();
+      }
+    };
+  }, []);
+
+  const signIn = async (email, password) => {
+    setLoading(true);
+    try {
+      const res = await authService.signIn({ email, password });
+      const current = await authService.getCurrentUser();
+      setUser(current);
+      return { success: true, user: current };
+    } catch (err) {
+      return { success: false, error: err.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signUp = async ({ email, password, fullName, phone }) => {
+    setLoading(true);
+    try {
+      const res = await authService.signUp({ email, password, fullName, phone });
+      const current = await authService.getCurrentUser();
+      setUser(current);
+      return { success: true, user: current };
+    } catch (err) {
+      return { success: false, error: err.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signOut = async () => {
+    setLoading(true);
+    try {
+      await authService.signOut();
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateProfile = async (updates) => {
+    if (!user) return;
+    const updated = await authService.updateProfile(user.id, updates);
+    if (updated) {
+      setUser(prev => ({ ...prev, ...updated }));
+    }
+    return updated;
+  };
+
+  const role = user?.role || 'customer';
+  const isAdmin = role === 'admin';
+
+  const value = {
+    user,
+    role,
+    isAdmin,
+    loading,
+    signIn,
+    signUp,
+    signOut,
+    updateProfile
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}

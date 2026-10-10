@@ -1,5 +1,5 @@
 /* ==========================================================================
-   HELINART — LUXURY NAIL BEAUTY & SALON PLATFORM
+   NAILSBYHELINA — LUXURY NAIL ART STUDIO & PRESS-ON BRAND
    Full-Width Editorial Top Navigation Design System
    ========================================================================== */
 
@@ -24,7 +24,7 @@
 
 :root {
   /* ========================================================================
-     FINAL HELINART TYPOGRAPHY SYSTEM
+     FINAL NAILSBYHELINA TYPOGRAPHY SYSTEM
      1. THENYODIA → MAIN TEXT / BRAND VISUAL LANGUAGE
      2. AGRAHAM   → SUB TEXT / SUPPORTING LUXURY LANGUAGE
      3. ARIAL     → UTILITY / INTERACTIVE / TECHNICAL TEXT
@@ -40,7 +40,7 @@
   --font-ui: var(--font-utility);
 
   /* ========================================================================
-     HELINART DEEPER LUXURY COLOUR PALETTE (10-15% RICHER DEPTH)
+     NAILSBYHELINA DEEPER LUXURY COLOUR PALETTE (10-15% RICHER DEPTH)
      ======================================================================== */
   --bg-light: #F4ECE6;
   --bg-medium: #EEE6DE;
@@ -700,8 +700,6 @@ select,
   border-bottom: 1px solid var(--rose-border);
   padding: var(--space-4) var(--space-5);
   box-shadow: var(--shadow-subtle);
-  z-index: 999;
-}
   z-index: 999;
 }
 

@@ -1,0 +1,8 @@
+# Robots.txt for Nailsbyhelina Luxury Nail Studio & Press-Ons
+User-agent: *
+Allow: /
+Disallow: /checkout
+Disallow: /cart
+
+# Public XML Sitemap
+Sitemap: https://nailsbyhelina.com/sitemap.xml

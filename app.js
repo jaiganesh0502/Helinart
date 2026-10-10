@@ -1,5 +1,5 @@
 /**
- * HELINART — Full-Width Luxury Platform Controller
+ * NAILSBYHELINA — Full-Width Luxury Platform Controller
  * Handles WAI-ARIA Top Navigation Tab Switching, Mobile Menu Drawer, View Transitions,
  * Live Price Calculator, Dynamic Appointment Scheduling, Favourites Moodboard, and Modals.
  */
@@ -591,7 +591,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div style="display:flex; align-items:center; gap:var(--space-3);">
             <span class="price" style="font-size:20px;">₹${newBooking.price.toLocaleString()}</span>
-            <button class="button-secondary btn-compact" onclick="alert('Reschedule request submitted to Helinart concierge!')">Reschedule</button>
+            <button class="button-secondary btn-compact" onclick="alert('Reschedule request submitted to Nailsbyhelina concierge!')">Reschedule</button>
             <button class="button-secondary btn-compact" style="color:#9B6260;" onclick="this.closest('.appointment-horizontal-card').remove(); alert('Appointment cancelled.');">Cancel</button>
           </div>
         `;
@@ -711,7 +711,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div style="display:flex; flex-direction:column; gap:12px;">
           <div style="background:var(--cream); padding:12px; border-radius:var(--radius-md); border-left:3px solid var(--sage);">
             <div style="font-weight:700; color:var(--navy);">Appointment Reminder</div>
-            <div class="secondary-text" style="font-size:13px; margin-top:2px;">Your session with Sarah Lawrence is confirmed for Aug 31 at 4:30 PM in Salon Suite 2.</div>
+            <div class="secondary-text" style="font-size:13px; margin-top:2px;">Your session with Sarah Lawrence is confirmed for Aug 31 at 4:30 PM in Studio Suite 2.</div>
             <div class="caption" style="margin-top:4px;">10 mins ago</div>
           </div>
           <div style="background:var(--cream); padding:12px; border-radius:var(--radius-md); border-left:3px solid var(--champagne-gold);">
@@ -733,7 +733,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('header-profile-btn')?.addEventListener('click', () => {
     openModal(
       'Member Profile & VIP Privileges',
-      'Helinart Salon Suite Concierge',
+      'Nailsbyhelina Studio Suite Concierge',
       `
         <div style="display:flex; flex-direction:column; gap:14px;">
           <div style="display:flex; align-items:center; gap:14px; background:var(--cream); padding:14px; border-radius:var(--radius-md);">
@@ -772,14 +772,14 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('view-appt-btn')?.addEventListener('click', () => {
     openModal(
       'Upcoming Appointment Details',
-      'Helinart Salon Suite 2 — Ref: #HL-82910',
+      'Nailsbyhelina Studio Suite 2 — Ref: #HL-82910',
       `
         <div style="display:flex; flex-direction:column; gap:8px;">
           <div><strong>Treatment:</strong> Gel Extension + Velvet Chrome Art</div>
           <div><strong>Artist:</strong> Sarah Lawrence (Master Stylist)</div>
           <div><strong>Schedule:</strong> Aug 31, 2026 at 4:30 PM (90 mins)</div>
-          <div><strong>Estimated Total:</strong> ₹1,199 (Pay at Salon / Card / UPI)</div>
-          <div><strong>Salon Complimentary:</strong> Iced Rose Botanical Tea & Keratin Hydration</div>
+          <div><strong>Estimated Total:</strong> ₹1,199 (Pay at Studio / Card / UPI)</div>
+          <div><strong>Studio Complimentary:</strong> Iced Rose Botanical Tea & Keratin Hydration</div>
         </div>
       `
     );
@@ -808,11 +808,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('share-referral-btn')?.addEventListener('click', () => {
-    showToast('Referral link "helinart.com/ref/haritha" copied to clipboard!', 'success');
+    showToast('Referral link "nailsbyhelina.com/ref/haritha" copied to clipboard!', 'success');
   });
 
   document.getElementById('join-vip-pass-btn')?.addEventListener('click', () => {
-    showToast('Welcome to Helinart VIP Club! Monthly pass activated.', 'success');
+    showToast('Welcome to Nailsbyhelina VIP Club! Monthly pass activated.', 'success');
   });
 
   document.getElementById('claim-vip-btn')?.addEventListener('click', () => {

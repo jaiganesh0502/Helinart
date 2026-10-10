@@ -1,0 +1,257 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Profile {
+  id        String   @id @db.Uuid
+  email     String
+  fullName  String?  @map("full_name")
+  phone     String?
+  role      String   @default("customer")
+  avatarUrl String?  @map("avatar_url")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  favorites Favorite[]
+  cartItems CartItem[]
+  orders    Order[]
+
+  @@map("profiles")
+}
+
+model Category {
+  id          String    @id
+  name        String
+  slug        String    @unique
+  description String?
+  sortOrder   Int       @default(0) @map("sort_order")
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  products    Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id               String         @id
+  name             String
+  slug             String         @unique
+  description      String?
+  shortDescription String?        @map("short_description")
+  categoryId       String?        @map("category_id")
+  price            Decimal        @db.Decimal(10, 2)
+  comparePrice     Decimal?       @map("compare_price") @db.Decimal(10, 2)
+  stockQuantity    Int            @default(50) @map("stock_quantity")
+  isActive         Boolean        @default(true) @map("is_active")
+  isFeatured       Boolean        @default(false) @map("is_featured")
+  isBestseller     Boolean        @default(false) @map("is_bestseller")
+  isNew            Boolean        @default(false) @map("is_new")
+  rating           Decimal        @default(4.9) @db.Decimal(3, 2)
+  reviewsCount     Int            @default(0) @map("reviews_count")
+  shapes           String[]       @default(["Almond", "Coffin", "Square"])
+  colors           String[]       @default(["Dusty Rose", "Champagne Gold"])
+  length           String?        @default("Medium")
+  finish           String?        @default("Glossy Gel Chrome")
+  collection       String?        @default("Atelier Signature")
+  wearDuration     String?        @default("Up to 3 weeks") @map("wear_duration")
+  reusableCount    String?        @default("Up to 5x") @map("reusable_count")
+  primaryImage     String         @map("primary_image")
+  createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  category      Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  images        ProductImage[]
+  favorites     Favorite[]
+  cartItems     CartItem[]
+  lookbookItems LookbookItem[]
+
+  @@map("products")
+}
+
+model ProductImage {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  productId String   @map("product_id")
+  imageUrl  String   @map("image_url")
+  altText   String?  @map("alt_text")
+  sortOrder Int      @default(0) @map("sort_order")
+  isPrimary Boolean  @default(false) @map("is_primary")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
+}
+
+model Favorite {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  productId String   @map("product_id")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user    Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("favorites")
+}
+
+model CartItem {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  productId String   @map("product_id")
+  shape     String?  @default("Almond")
+  size      String?  @default("M")
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user    Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("cart_items")
+}
+
+model Order {
+  id             String      @id
+  userId         String?     @map("user_id") @db.Uuid
+  orderNumber    String      @unique @map("order_number")
+  status         String      @default("pending")
+  subtotal       Decimal     @db.Decimal(10, 2)
+  shippingAmount Decimal     @default(0) @map("shipping_amount") @db.Decimal(10, 2)
+  discountAmount Decimal     @default(0) @map("discount_amount") @db.Decimal(10, 2)
+  total          Decimal     @db.Decimal(10, 2)
+  customerName   String      @map("customer_name")
+  customerEmail  String?     @map("customer_email")
+  customerPhone  String      @map("customer_phone")
+  shippingAddress Json       @map("shipping_address")
+  paymentStatus  String      @default("paid") @map("payment_status")
+  paymentMethod  String?     @default("UPI / Card") @map("payment_method")
+  notes          String?
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user  Profile?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderId     String   @map("order_id")
+  productId   String?  @map("product_id")
+  productName String   @map("product_name")
+  unitPrice   Decimal  @map("unit_price") @db.Decimal(10, 2)
+  quantity    Int
+  subtotal    Decimal  @db.Decimal(10, 2)
+  shape       String?
+  size        String?
+  imageUrl    String?  @map("image_url")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("order_items")
+}
+
+model LookbookItem {
+  id               String   @id
+  title            String
+  subtitle         String?
+  imageUrl         String   @map("image_url")
+  productId        String?  @map("product_id")
+  priceDisplay     String?  @map("price_display")
+  instagramCaption String?  @map("instagram_caption")
+  isActive         Boolean  @default(true) @map("is_active")
+  sortOrder        Int      @default(0) @map("sort_order")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@map("lookbook_items")
+}
+
+model Offer {
+  id            String    @id
+  title         String
+  description   String?
+  discountType  String    @default("percentage") @map("discount_type")
+  discountValue Decimal   @map("discount_value") @db.Decimal(10, 2)
+  promoCode     String    @unique @map("promo_code")
+  minOrderValue Decimal?  @default(0) @map("min_order_value") @db.Decimal(10, 2)
+  startDate     DateTime? @map("start_date") @db.Timestamptz(6)
+  endDate       DateTime? @map("end_date") @db.Timestamptz(6)
+  isActive      Boolean   @default(true) @map("is_active")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("offers")
+}
+
+model HomepageContent {
+  id                    String    @id
+  status                String    @default("published")
+  heroEyebrow           String?   @default("New atelier collection drop") @map("hero_eyebrow")
+  heroHeading           String?   @default("Haute couture nail art,") @map("hero_heading")
+  heroHighlight         String?   @default("made effortless.") @map("hero_highlight")
+  heroDescription       String?   @default("Discover professional-quality reusable press-on sets sculpted by master artists, delivered directly to your doorstep across India.") @map("hero_description")
+  primaryCtaText        String?   @default("Explore nail sets") @map("primary_cta_text")
+  secondaryCtaText      String?   @default("Studio Opening Soon") @map("secondary_cta_text")
+  collectionHeading     String?   @default("Curated Nail Collections") @map("collection_heading")
+  collectionDescription String?   @default("Handcrafted press-on sets designed with precision gel artistry and long-lasting durability.") @map("collection_description")
+  announcementText      String?   @default("Complimentary express pan-India delivery on orders over ₹999 ✨") @map("announcement_text")
+  footerText            String?   @default("Haute couture press-on nails sculpted with salon-grade precision and delivered across India.") @map("footer_text")
+  publishedAt           DateTime? @default(now()) @map("published_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("homepage_content")
+}
+
+model SiteSetting {
+  id                    String   @id @default("global")
+  brandName             String?  @default("Nailsbyhelina") @map("brand_name")
+  instagramUrl          String?  @default("https://www.instagram.com/nails.by.helina/") @map("instagram_url")
+  instagramHandle       String?  @default("@nails.by.helina") @map("instagram_handle")
+  whatsappNumber        String?  @default("+91 93614 05676") @map("whatsapp_number")
+  whatsappRawNumber     String?  @default("919361405676") @map("whatsapp_raw_number")
+  supportEmail          String?  @default("concierge@nailsbyhelina.com") @map("support_email")
+  announcementText      String?  @default("Complimentary express pan-India delivery on orders over ₹999 ✨") @map("announcement_text")
+  freeShippingThreshold Decimal? @default(999) @map("free_shipping_threshold") @db.Decimal(10, 2)
+  currency              String?  @default("INR")
+  studioBookingEnabled  Boolean  @default(false) @map("studio_booking_enabled")
+  updatedAt             DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("site_settings")
+}
+
+model StudioSetting {
+  id                  String   @id @default("studio_main")
+  bookingEnabled      Boolean  @default(false) @map("booking_enabled")
+  availableDays       String[] @default(["Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]) @map("available_days")
+  openingTime         String?  @default("11:00 AM") @map("opening_time")
+  closingTime         String?  @default("07:30 PM") @map("closing_time")
+  appointmentDuration Int      @default(90) @map("appointment_duration")
+  maxDailyBookings    Int      @default(6) @map("max_daily_bookings")
+  depositAmount       Decimal? @default(200) @map("deposit_amount") @db.Decimal(10, 2)
+  updatedAt           DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("studio_settings")
+}
+
+model AuditLog {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  adminUserId String?  @map("admin_user_id") @db.Uuid
+  adminEmail  String?  @map("admin_email")
+  action      String
+  entityType  String   @map("entity_type")
+  entityId    String?  @map("entity_id")
+  details     Json?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("audit_logs")
+}

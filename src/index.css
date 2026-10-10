@@ -1,0 +1,440 @@
+@import "tailwindcss";
+
+@theme {
+  --font-heading: "Cormorant Garamond", Georgia, serif;
+  --font-body: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* =========================================================================
+     NAILSBYHELINA REFINED LUXURY COLOR PALETTE (WCAG AA Contrast Compliant)
+     ========================================================================= */
+  /* Main Backgrounds (60%) */
+  --color-warm-ivory: #F6F3ED;
+  --color-soft-cream: #FFFDFC;
+  --color-soft-champagne: #F4ECE6;
+
+  /* Deep Navy Tones (25% Premium Sections & Contrast) */
+  --color-slate-navy: #313851;
+  --color-deep-navy: #262D42;
+  --color-soft-navy: #3A425E;
+
+  /* Refined WCAG AA Compliant Dusty Rose Accents (4.5:1+ Contrast) */
+  --color-dusty-rose: #9C5550;
+  --color-dusty-rose-deep: #8A4743;
+  --color-accent-rose-dark: #793D39;
+  --color-dusty-rose-light: #B26661;
+  --color-dusty-rose-soft: #F4EAE8;
+
+  /* Text & Depth */
+  --color-espresso: #2B2223;
+  --color-body-dark: #453A3C;
+  --color-warm-taupe: #786866;
+  --color-muted-taupe: #786866;
+
+  /* Neutral Structure & Subtle Contrast (5%) */
+  --color-blue-grey: #C2CBD3;
+  --color-border-luxury: #D8C6C3;
+
+  /* Luxury Accents (5% combined) */
+  --color-champagne-gold: #C8A46A;
+  --color-gold-dark: #A87F45;
+  --color-soft-sage: #879B83;
+  --color-sage-light: #A8C1A2;
+}
+
+:root {
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  color-scheme: light;
+  background-color: #F6F3ED;
+  color: #453A3C;
+
+  /* Section 26: Global Contrast Tokens */
+  --text-on-light-primary: #313851;
+  --text-on-light-body: #453A3C;
+  --text-on-light-muted: #786866;
+
+  --text-on-dark-primary: #FFFDFC;
+  --text-on-dark-body: #F4ECE6;
+  --text-on-dark-muted: #C2CBD3;
+
+  --accent-rose: #9C5550;
+  --accent-rose-hover: #8A4743;
+  --accent-rose-dark: #793D39;
+  --accent-rose-light: #B26661;
+  --accent-rose-soft: #F4EAE8;
+
+  --accent-gold: #C8A46A;
+  --accent-gold-dark: #A87F45;
+
+  --border-luxury: #D8C6C3;
+}
+
+/* Typography defaults: Refined serif for headings with medium weight & comfortable letter-spacing */
+h1, h2, h3, h4, .font-heading {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  letter-spacing: 0.015em;
+  font-weight: 500;
+}
+
+/* Default heading color on light backgrounds */
+body h1, body h2, body h3, body h4 {
+  color: var(--text-on-light-primary);
+}
+
+/* Section 4 & 5: Dark Section Guarantee (Headings and body text ALWAYS light on navy) */
+.dark-section, [data-dark-section="true"], footer {
+  color: var(--text-on-dark-body);
+}
+
+.dark-section h1, .dark-section h2, .dark-section h3, .dark-section h4, .dark-section .font-heading,
+footer h1, footer h2, footer h3, footer h4, footer .font-heading {
+  color: var(--text-on-dark-primary) !important;
+}
+
+/* Visible Keyboard Focus Styles */
+:focus-visible {
+  outline: 2px solid var(--accent-rose);
+  outline-offset: 3px;
+}
+
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid #9C5550;
+  outline-offset: 2px;
+}
+
+/* =========================================================================
+   LUXURY GRADIENTS & GLASS EFFECTS (Refined for Contrast)
+   ========================================================================= */
+.bg-gradient-luxury-bg {
+  background: linear-gradient(
+    135deg,
+    #EEE6DE 0%,
+    #F4ECE6 40%,
+    #E4D8D5 70%,
+    #DCD3D1 100%
+  );
+}
+
+.bg-gradient-dusty-rose {
+  background: linear-gradient(
+    135deg,
+    #B26661 0%,
+    #9C5550 55%,
+    #8A4743 100%
+  );
+}
+
+.bg-gradient-navy {
+  background: linear-gradient(
+    135deg,
+    #262D42 0%,
+    #313851 55%,
+    #3A425E 100%
+  );
+}
+
+/* Section 19: High Contrast Glass Card */
+.bg-glass-card {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 253, 252, 0.94) 0%,
+    rgba(244, 236, 230, 0.88) 100%
+  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(216, 198, 195, 0.75);
+}
+
+.bg-glass-navy {
+  background: linear-gradient(
+    135deg,
+    rgba(38, 45, 66, 0.96) 0%,
+    rgba(49, 56, 81, 0.92) 55%,
+    rgba(58, 66, 94, 0.92) 100%
+  );
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Form inputs (Nailsbyhelina Luxury Contact System) */
+input, select, textarea {
+  border-color: #D8C6C3;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: #C98F8A;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(201, 143, 138, 0.12);
+}
+
+.hero-instagram {
+  color: #313851;
+  transition: color 0.2s ease;
+}
+.hero-instagram:hover {
+  color: #C98F8A;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Luxury Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #F4ECE6;
+}
+::-webkit-scrollbar-thumb {
+  background: #C2CBD3;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #C98F8A;
+}
+
+/* Nailsbyhelina Lookbook Card Button Contrast */
+.lookbook-shop-btn {
+  background: rgba(255, 253, 252, 0.92);
+  color: #313851;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  text-shadow: none;
+  transition: all 0.2s ease;
+}
+
+.lookbook-shop-btn:hover {
+  background: #FFFDFC !important;
+  color: #262D42 !important;
+}
+
+/* Nailsbyhelina Studio Coming Soon Animations */
+@keyframes soft-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-soft-float {
+  animation: soft-float 3.5s ease-in-out infinite;
+}
+
+@keyframes sparkle-pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+.animate-sparkle-1 {
+  animation: sparkle-pulse 2.5s ease-in-out infinite;
+}
+
+.animate-sparkle-2 {
+  animation: sparkle-pulse 3.2s ease-in-out infinite 0.4s;
+}
+
+.animate-sparkle-3 {
+  animation: sparkle-pulse 3.8s ease-in-out infinite 0.8s;
+}
+
+.animate-sparkle-4 {
+  animation: sparkle-pulse 3.0s ease-in-out infinite 1.2s;
+}
+
+@keyframes shimmer-gold {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-opening-soon {
+  background: linear-gradient(90deg, #A87F45 0%, #E1C38B 50%, #A87F45 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer-gold 5s linear infinite;
+}
+
+/* =========================================================================
+   NAILSBYHELINA HERO ANIMATED LOGO SHOWCASE
+   ========================================================================= */
+
+@keyframes logoReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.90);
+  }
+  45% {
+    opacity: 1;
+    transform: translateY(0) scale(1.03);
+  }
+  70% {
+    transform: scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes logoFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes sparkleGlint {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(0.75);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes strokeFlow {
+  0% {
+    stroke-dashoffset: 1200;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.logo-showcase {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 460px;
+  border-radius: 28px;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      rgba(201, 143, 138, 0.18),
+      transparent 36%
+    ),
+    radial-gradient(
+      circle at 75% 75%,
+      rgba(200, 164, 106, 0.12),
+      transparent 30%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(255, 253, 252, 0.95),
+      rgba(244, 236, 230, 0.90),
+      rgba(238, 230, 222, 0.88)
+    );
+  border: 1px solid rgba(216, 198, 195, 0.70);
+  box-shadow: 0 18px 46px rgba(49, 56, 81, 0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.logo-glow {
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(201, 143, 138, 0.18),
+    rgba(200, 164, 106, 0.08) 45%,
+    transparent 72%
+  );
+  filter: blur(18px);
+  animation: glowPulse 5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.logo-reveal-anim {
+  animation: logoReveal 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.logo-float-anim {
+  animation: logoFloat 4.5s ease-in-out infinite;
+}
+
+.nail-art-curve {
+  stroke-dasharray: 600;
+  animation: strokeFlow 18s linear infinite;
+}
+
+.nail-art-curve-secondary {
+  stroke-dasharray: 600;
+  animation: strokeFlow 24s linear infinite reverse;
+}
+
+.sparkle-anim-1 {
+  animation: sparkleGlint 2.8s ease-in-out infinite;
+}
+
+.sparkle-anim-2 {
+  animation: sparkleGlint 3.3s ease-in-out infinite 0.4s;
+}
+
+.sparkle-anim-3 {
+  animation: sparkleGlint 4.1s ease-in-out infinite 0.8s;
+}
+
+.sparkle-anim-4 {
+  animation: sparkleGlint 4.6s ease-in-out infinite 1.2s;
+}
+
+.sparkle-anim-5 {
+  animation: sparkleGlint 3.5s ease-in-out infinite 0.6s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-reveal-anim,
+  .logo-float-anim,
+  .logo-glow,
+  .nail-art-curve,
+  .nail-art-curve-secondary,
+  .sparkle-anim-1,
+  .sparkle-anim-2,
+  .sparkle-anim-3,
+  .sparkle-anim-4,
+  .sparkle-anim-5 {
+    animation: none !important;
+  }
+}
+
