@@ -49,8 +49,7 @@ export default function Login() {
         navigate(target, { replace: true });
       }
     } else {
-      // Security rule: Never reveal whether email exists, whether account is admin, or expected email
-      setError('Invalid email or password.');
+      setError(res.error || 'Invalid email or password.');
     }
   };
 
