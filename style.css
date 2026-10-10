@@ -6,13 +6,19 @@
 /* Font Definitions & Fallbacks */
 @font-face {
   font-family: "Thenyodia";
-  src: local("Thenyodia"), url("https://fonts.cdnfonts.com/s/72888/Thenyodia.woff") format("woff");
+  src: local("Thenyodia"),
+       url("fonts/Thenyodia.otf") format("opentype"),
+       url("assets/fonts/Thenyodia.otf") format("opentype"),
+       url("https://fonts.cdnfonts.com/s/72888/Thenyodia.woff") format("woff");
   font-display: swap;
 }
 
 @font-face {
   font-family: "Agraham";
-  src: local("Agraham"), url("https://fonts.cdnfonts.com/s/91234/Agraham.woff") format("woff");
+  src: local("Agraham"),
+       url("fonts/Agraham.otf") format("opentype"),
+       url("assets/fonts/Agraham.otf") format("opentype"),
+       url("https://fonts.cdnfonts.com/s/91234/Agraham.woff") format("woff");
   font-display: swap;
 }
 

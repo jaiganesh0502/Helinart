@@ -1,0 +1,16 @@
+{
+  "name": "helinart-luxury-nail-studio",
+  "version": "1.0.0",
+  "description": "Helinart Luxury Nail Studio Web Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "helinart",
+    "nail-studio",
+    "luxury"
+  ],
+  "author": "jaiganesh0502",
+  "license": "ISC"
+}

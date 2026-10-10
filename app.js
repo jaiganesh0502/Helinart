@@ -69,7 +69,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setTimeout(() => {
       toast.classList.remove('show');
-      toast.addEventListener('transitionend', () => toast.remove());
+      toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+      setTimeout(() => {
+        if (toast.parentElement) toast.remove();
+      }, 400);
     }, duration);
   }
 
@@ -662,7 +665,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    document.querySelector('.nav-search-box')?.addEventListener('click', () => {
+    document.querySelector('.nav-search-box')?.addEventListener('click', (e) => {
+      if (e.target === globalSearchInput) return;
       if (window.innerWidth <= 1220) {
         switchTab('designs');
         const term = prompt('Search nail designs, styles, or artists:');
