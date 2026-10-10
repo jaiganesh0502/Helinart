@@ -74,10 +74,11 @@ export default function AdminSettings() {
       showToast('Global store settings saved successfully!');
     } catch (err) {
       console.error('Failed to update settings', err);
-      showToast('Error saving settings.', 'error');
+      showToast(err.message ? `Error: ${err.message}` : 'Error saving settings.', 'error');
     } finally {
       setSaving(false);
     }
+
   };
 
   const showToast = (msg, type = 'success') => {

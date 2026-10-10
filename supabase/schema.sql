@@ -239,21 +239,60 @@ ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN AS $$
 BEGIN
-  -- Strict multi-factor verification:
-  -- 1. Authenticated user ID exists
-  -- 2. profiles.role = 'admin'
-  -- 3. Authenticated email is strictly 'helina.nailart@gmail.com' in both profiles and auth JWT
+  -- Strict, reliable verification:
+  -- 1. Cryptographically verified email from auth.jwt() is strictly 'helina.nailart@gmail.com'
+  -- OR 2. profiles table role = 'admin'
   RETURN (
     LOWER(COALESCE(auth.jwt() ->> 'email', '')) = 'helina.nailart@gmail.com'
-    AND EXISTS (
+    OR EXISTS (
       SELECT 1 FROM public.profiles
-      WHERE id = auth.uid() 
-        AND role = 'admin'
-        AND LOWER(email) = 'helina.nailart@gmail.com'
+      WHERE id = auth.uid() AND role = 'admin'
     )
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function & Trigger: Automatically create or update public.profiles on Auth user creation/login
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, email, full_name, role)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'full_name', 'Customer'),
+    CASE 
+      WHEN LOWER(NEW.email) = 'helina.nailart@gmail.com' THEN 'admin'
+      ELSE 'customer'
+    END
+  )
+  ON CONFLICT (id) DO UPDATE
+  SET 
+    email = EXCLUDED.email,
+    role = CASE 
+      WHEN LOWER(EXCLUDED.email) = 'helina.nailart@gmail.com' THEN 'admin'
+      ELSE public.profiles.role
+    END;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT OR UPDATE ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- Backfill any existing users from auth.users into public.profiles
+INSERT INTO public.profiles (id, email, full_name, role)
+SELECT 
+  id, 
+  email, 
+  COALESCE(raw_user_meta_data->>'full_name', 'Helina Admin'),
+  CASE WHEN LOWER(email) = 'helina.nailart@gmail.com' THEN 'admin' ELSE 'customer' END
+FROM auth.users
+ON CONFLICT (id) DO UPDATE
+SET role = CASE WHEN LOWER(public.profiles.email) = 'helina.nailart@gmail.com' THEN 'admin' ELSE public.profiles.role END;
+
 
 -- --- Profiles RLS ---
 DROP POLICY IF EXISTS "Users can view own profile or admin can view all" ON public.profiles;

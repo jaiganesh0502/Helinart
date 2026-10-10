@@ -67,14 +67,21 @@ export const settingsService = {
         .upsert(newSettings)
         .select()
         .single();
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error('Supabase site_settings upsert error:', error);
+        throw error;
+      }
+      try {
+        localStorage.setItem(LOCAL_SETTINGS_KEY, JSON.stringify(data || newSettings));
+      } catch (e) {}
+      return data || newSettings;
     }
 
     const current = await this.getSettings();
     const merged = { ...current, ...newSettings };
     localStorage.setItem(LOCAL_SETTINGS_KEY, JSON.stringify(merged));
     return merged;
+
   },
 
   /**

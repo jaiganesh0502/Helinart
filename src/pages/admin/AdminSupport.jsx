@@ -77,10 +77,11 @@ export default function AdminSupport() {
       showToast('Support and social links updated across the entire customer store!');
     } catch (err) {
       console.error('Error saving support settings', err);
-      showToast('Failed to save settings. Please try again.', 'error');
+      showToast(err.message ? `Error: ${err.message}` : 'Failed to save settings. Please try again.', 'error');
     } finally {
       setSaving(false);
     }
+
   };
 
   const showToast = (msg, type = 'success') => {
