@@ -62,13 +62,27 @@ export const settingsService = {
     };
 
     if (isSupabaseConfigured) {
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('site_settings')
         .upsert(newSettings)
         .select()
         .single();
+
       if (error) {
-        console.error('Supabase site_settings upsert error:', error);
+        const updateRes = await supabase
+          .from('site_settings')
+          .update(newSettings)
+          .eq('id', 'global')
+          .select()
+          .single();
+        if (!updateRes.error && updateRes.data) {
+          data = updateRes.data;
+          error = null;
+        }
+      }
+
+      if (error) {
+        console.error('Supabase site_settings save error:', error);
         throw error;
       }
       try {

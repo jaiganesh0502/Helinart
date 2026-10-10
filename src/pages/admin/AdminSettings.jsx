@@ -95,7 +95,11 @@ export default function AdminSettings() {
             ? 'bg-rose-50 text-rose-800 border-rose-200'
             : 'bg-[#262D42] text-[#FFFDFC] border-[#C8A46A]/40'
         }`}>
-          <CheckCircle2 className="w-5 h-5 text-[#C8A46A] shrink-0" />
+          {toastMessage.type === 'error' ? (
+            <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+          ) : (
+            <CheckCircle2 className="w-5 h-5 text-[#C8A46A] shrink-0" />
+          )}
           <span>{toastMessage.text}</span>
         </div>
       )}

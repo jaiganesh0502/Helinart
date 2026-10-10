@@ -19,6 +19,9 @@ export default function Footer({ dynamicSettings, dynamicContent }) {
   const instagramHandle = dynamicSettings?.instagram_handle || '@nails.by.helina';
   const instagramUrl = dynamicSettings?.instagram_url || 'https://www.instagram.com/nails.by.helina/';
   const supportEmail = dynamicSettings?.support_email || 'concierge@nailsbyhelina.com';
+  const studioBookingEnabled = dynamicSettings?.studio_booking_enabled !== undefined
+    ? Boolean(dynamicSettings.studio_booking_enabled)
+    : FEATURES.STUDIO_BOOKING_ENABLED;
 
   const handleNewsletterSubmit = (e) => {
     e.preventDefault();
@@ -219,7 +222,7 @@ export default function Footer({ dynamicSettings, dynamicContent }) {
         <div>
           <h4 className="font-heading font-medium text-base text-[#FFFDFC] mb-4">Studio Concierge</h4>
           <ul className="space-y-2 text-xs sm:text-sm text-[#C2CBD3]">
-            <li><Link to="/book" className="hover:text-[#D8A19B] transition-colors font-medium text-[#FFFDFC]">{FEATURES.STUDIO_BOOKING_ENABLED ? 'Book Studio Slot' : 'Studio Opening Soon'}</Link></li>
+            <li><Link to="/book" className="hover:text-[#D8A19B] transition-colors font-medium text-[#FFFDFC]">{studioBookingEnabled ? 'Book Studio Slot' : 'Studio Opening Soon'}</Link></li>
             <li><Link to="/size-guide" className="hover:text-[#D8A19B] transition-colors">Sizing Guide & mm Chart</Link></li>
             <li><Link to="/how-it-works" className="hover:text-[#D8A19B] transition-colors">How Press-Ons Work</Link></li>
             <li><Link to="/track-order" className="hover:text-[#D8A19B] transition-colors">Track Courier Order</Link></li>
