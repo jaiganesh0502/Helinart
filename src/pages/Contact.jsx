@@ -2,21 +2,34 @@ import React, { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle2, MessageSquare, Camera, Sparkles } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import SEO from '../components/SEO';
+import { useAuth } from '../context/AuthContext';
 import { settingsService } from '../services/settingsService';
 import { SOCIAL_LINKS } from '../config/social';
 import { apiClient } from '../api';
 
 export default function Contact() {
   const { addToast } = useStore();
+  const { user } = useAuth();
   const [siteSettings, setSiteSettings] = useState(null);
   const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    email: '',
+    name: user?.full_name || '',
+    phone: user?.phone || '',
+    email: user?.email || '',
     interested: 'Press-On Nail Sets',
     message: ''
   });
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        name: prev.name || user.full_name || '',
+        phone: prev.phone || user.phone || '',
+        email: prev.email || user.email || ''
+      }));
+    }
+  }, [user]);
 
   useEffect(() => {
     let mounted = true;
@@ -220,7 +233,7 @@ ${message}`;
                     autoComplete="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="Enter your email"
+                    placeholder="Enter your email address"
                     className="w-full text-sm rounded-[10px] border border-[#D8C6C3] bg-[#FFFDFC] text-[#2B2223] placeholder-[#8B7774] px-3.5 py-3 focus:border-[#C98F8A] focus:outline-none focus:ring-3 focus:ring-[#C98F8A]/15 transition-all"
                   />
                 </div>
@@ -258,7 +271,7 @@ ${message}`;
                   rows={5}
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  placeholder="Tell us how we can help"
+                  placeholder="How can we help you?"
                   className="w-full text-sm rounded-[10px] border border-[#D8C6C3] bg-[#FFFDFC] text-[#2B2223] placeholder-[#8B7774] px-3.5 py-3 min-h-[130px] resize-y focus:border-[#C98F8A] focus:outline-none focus:ring-3 focus:ring-[#C98F8A]/15 transition-all"
                 />
               </div>

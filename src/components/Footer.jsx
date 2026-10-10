@@ -293,6 +293,7 @@ export default function Footer({ dynamicSettings, dynamicContent }) {
             <Link to="/shipping-returns" className="hover:text-[#D8A19B] transition-colors">Shipping & Returns</Link>
             <Link to="/privacy-policy" className="hover:text-[#D8A19B] transition-colors">Privacy Policy</Link>
             <Link to="/terms" className="hover:text-[#D8A19B] transition-colors">Terms of Service</Link>
+            <Link to="/admin/login" className="hover:text-[#D8A19B] transition-colors text-[#C8A46A]">Admin Portal</Link>
           </div>
 
           {/* Supported Payment Badges */}

@@ -9,11 +9,13 @@ import { useStore } from '../store/useStore';
 import SizeGuideModal from '../components/SizeGuideModal';
 import RecentlyViewedRow from '../components/RecentlyViewedRow';
 import SEO from '../components/SEO';
+import { useAuth } from '../context/AuthContext';
 import { settingsService } from '../services/settingsService';
 
 export default function ProductDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user: authUser } = useAuth();
   const [product, setProduct] = useState(null);
   const [siteSettings, setSiteSettings] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -29,10 +31,10 @@ export default function ProductDetails() {
   // Modals & form state
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   const [isNotifyOpen, setIsNotifyOpen] = useState(false);
-  const [notifyEmail, setNotifyEmail] = useState('');
+  const [notifyEmail, setNotifyEmail] = useState(authUser?.email || '');
   const [isReviewFormOpen, setIsReviewFormOpen] = useState(false);
   const [reviewForm, setReviewForm] = useState({
-    author: '',
+    author: authUser?.full_name || '',
     rating: 5,
     comment: '',
     customerPhoto: ''
@@ -40,9 +42,20 @@ export default function ProductDetails() {
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
 
   // Pincode state
-  const [pincodeInput, setPincodeInput] = useState('560001');
+  const [pincodeInput, setPincodeInput] = useState('');
   const [pincodeResult, setPincodeResult] = useState(null);
   const [pincodeChecking, setPincodeChecking] = useState(false);
+
+  useEffect(() => {
+    if (authUser) {
+      if (authUser.full_name && !reviewForm.author) {
+        setReviewForm(prev => ({ ...prev, author: authUser.full_name }));
+      }
+      if (authUser.email && !notifyEmail) {
+        setNotifyEmail(authUser.email);
+      }
+    }
+  }, [authUser]);
 
   const { toggleFavorite, isFavorite, addToCart, addRecentlyViewed, requestStockNotification, addToast } = useStore();
 
@@ -80,10 +93,6 @@ export default function ProductDetails() {
     return () => { mounted = false; };
   }, [id, addRecentlyViewed]);
 
-  // Initial pincode test
-  useEffect(() => {
-    checkPincodeDelivery('560001').then(res => setPincodeResult(res));
-  }, []);
 
   const handlePincodeCheck = async (e) => {
     e.preventDefault();
@@ -490,7 +499,7 @@ export default function ProductDetails() {
                 maxLength={6}
                 value={pincodeInput}
                 onChange={(e) => setPincodeInput(e.target.value.replace(/\D/g, ''))}
-                placeholder="Enter 6-digit Pincode"
+                placeholder="Enter your PIN code"
                 className="flex-1 px-3 py-2 text-xs rounded-xl border border-[#D8C6C3] bg-[#FFFDFC] text-[#313851] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
               />
               <button
@@ -597,10 +606,11 @@ export default function ProductDetails() {
                 <input
                   type="text"
                   required
+                  autoComplete="name"
                   value={reviewForm.author}
                   onChange={(e) => setReviewForm({ ...reviewForm, author: e.target.value })}
-                  placeholder="e.g. Diya Nair"
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
+                  placeholder="Enter your name"
+                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
                 />
               </div>
 
@@ -731,10 +741,11 @@ export default function ProductDetails() {
               <input
                 type="email"
                 required
+                autoComplete="email"
                 value={notifyEmail}
                 onChange={(e) => setNotifyEmail(e.target.value)}
-                placeholder="your.email@example.com"
-                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
+                placeholder="Enter your email address"
+                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
               />
               <div className="flex gap-2 justify-end">
                 <button

@@ -20,12 +20,23 @@ export default function Checkout() {
     name: authUser?.full_name || user?.name || '',
     email: authUser?.email || user?.email || '',
     phone: authUser?.phone || user?.phone || '',
-    address: '42 Orchid Villa, 12th Main',
-    apartment: 'Apt 302',
-    city: 'Bengaluru',
-    state: 'Karnataka',
-    pincode: '560038'
+    address: '',
+    apartment: '',
+    city: '',
+    state: '',
+    pincode: ''
   });
+
+  React.useEffect(() => {
+    if (authUser) {
+      setForm(prev => ({
+        ...prev,
+        name: prev.name || authUser.full_name || '',
+        email: prev.email || authUser.email || '',
+        phone: prev.phone || authUser.phone || '',
+      }));
+    }
+  }, [authUser]);
 
   const [paymentMethod, setPaymentMethod] = useState('UPI');
   const [submitting, setSubmitting] = useState(false);
@@ -155,53 +166,57 @@ export default function Checkout() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-[#313851] mb-1">Full Recipient Name *</label>
+                <label className="block text-xs font-semibold text-[#313851] mb-1">Full Name *</label>
                 <input
                   type="text"
                   required
+                  autoComplete="name"
                   name="name"
                   value={form.name}
                   onChange={handleInputChange}
-                  placeholder="e.g. Diya Nair"
-                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
+                  placeholder="Enter your full name"
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#313851] mb-1">Mobile Number (for Courier SMS) *</label>
+                <label className="block text-xs font-semibold text-[#313851] mb-1">Phone Number *</label>
                 <input
                   type="tel"
                   required
+                  autoComplete="tel"
                   name="phone"
                   value={form.phone}
                   onChange={handleInputChange}
-                  placeholder="9876543210"
-                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
+                  placeholder="Enter your phone number"
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
                 />
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-[#313851] mb-1">Email Address (for Order Updates)</label>
+                <label className="block text-xs font-semibold text-[#313851] mb-1">Email Address</label>
                 <input
                   type="email"
+                  autoComplete="email"
                   name="email"
                   value={form.email}
                   onChange={handleInputChange}
-                  placeholder="your.email@example.com"
-                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
+                  placeholder="Enter your email address"
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
                 />
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-[#313851] mb-1">Street Address / Society *</label>
+                <label className="block text-xs font-semibold text-[#313851] mb-1">Street Address *</label>
                 <input
                   type="text"
                   required
+                  autoComplete="street-address"
                   name="address"
                   value={form.address}
                   onChange={handleInputChange}
-                  placeholder="Flat/House No, Building Name, Street"
-                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
+                  placeholder="Enter your street address"
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
                 />
               </div>
 
@@ -213,21 +228,22 @@ export default function Checkout() {
                   value={form.apartment}
                   onChange={handleInputChange}
                   placeholder="Apartment, suite, or landmark"
-                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#313851] mb-1">Pincode *</label>
+                <label className="block text-xs font-semibold text-[#313851] mb-1">PIN Code *</label>
                 <input
                   type="text"
                   required
+                  autoComplete="postal-code"
                   maxLength={6}
                   name="pincode"
                   value={form.pincode}
                   onChange={handleInputChange}
-                  placeholder="560038"
-                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
+                  placeholder="Enter your PIN code"
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
                 />
               </div>
 
@@ -235,10 +251,12 @@ export default function Checkout() {
                 <label className="block text-xs font-semibold text-[#313851] mb-1">City</label>
                 <input
                   type="text"
+                  autoComplete="address-level2"
                   name="city"
                   value={form.city}
                   onChange={handleInputChange}
-                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
+                  placeholder="Enter your city"
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
                 />
               </div>
 
@@ -249,7 +267,8 @@ export default function Checkout() {
                   name="state"
                   value={form.state}
                   onChange={handleInputChange}
-                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
+                  placeholder="Enter your state"
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
                 />
               </div>
             </div>

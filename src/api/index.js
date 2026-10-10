@@ -26,8 +26,8 @@ function seedInitialData() {
         serviceId: 'gel-manicure',
         serviceName: 'Gel Manicure',
         price: 900,
-        userName: 'Priya Sharma',
-        phone: '9876543210',
+        userName: 'Verified Client',
+        phone: '9800000001',
         status: 'Confirmed',
         createdAt: new Date().toISOString()
       },
@@ -38,8 +38,8 @@ function seedInitialData() {
         serviceId: 'custom-nail-art',
         serviceName: 'Custom Nail Art',
         price: 1500,
-        userName: 'Aanya Verma',
-        phone: '9812345678',
+        userName: 'Verified Client',
+        phone: '9800000002',
         status: 'Confirmed',
         createdAt: new Date().toISOString()
       },
@@ -50,8 +50,8 @@ function seedInitialData() {
         serviceId: 'extensions',
         serviceName: 'Sculpted Extensions',
         price: 2200,
-        userName: 'Rhea Sen',
-        phone: '9789012345',
+        userName: 'Verified Client',
+        phone: '9800000003',
         status: 'Confirmed',
         createdAt: new Date().toISOString()
       }
@@ -78,10 +78,10 @@ function seedInitialData() {
         awb: 'BD89201948IN',
         estimatedDelivery: 'Tomorrow by 6:00 PM',
         customer: {
-          name: 'Aishwarya Raman',
-          email: 'aishwarya.r@example.com',
-          phone: '+91 98450 12345',
-          address: '42 Orchid Villa, 12th Main Road',
+          name: 'Verified Customer',
+          email: 'customer@nailsbyhelina.com',
+          phone: '+91 98000 00000',
+          address: 'Atelier Client Suite, 12th Main',
           city: 'Bengaluru',
           state: 'Karnataka',
           pincode: '560038'
@@ -200,7 +200,7 @@ export async function getProductReviews(productId) {
   return allReviews[productId] || initialProductReviews[productId] || [
     {
       id: `rev-default-1`,
-      author: 'Aarohi S.',
+      author: 'Verified Customer',
       rating: 5,
       date: '2026-09-10',
       verified: true,
@@ -209,7 +209,7 @@ export async function getProductReviews(productId) {
     },
     {
       id: `rev-default-2`,
-      author: 'Sunaina M.',
+      author: 'Verified Buyer',
       rating: 5,
       date: '2026-08-28',
       verified: true,
@@ -226,7 +226,7 @@ export async function addProductReview(productId, reviewData) {
   
   const newReview = {
     id: `rev-${Date.now().toString(36)}`,
-    author: reviewData.author.trim() || 'Anonymous Connoisseur',
+    author: reviewData.author.trim() || 'Verified Customer',
     rating: Number(reviewData.rating) || 5,
     date: new Date().toISOString().split('T')[0],
     verified: true,

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { Heart, ShoppingBag, Menu, X, User } from 'lucide-react';
+import { Heart, ShoppingBag, Menu, X, User, Shield } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { FEATURES } from '../config/features';
 import { useAuth } from '../context/AuthContext';
@@ -160,16 +160,34 @@ export default function Header({ dynamicSettings }) {
               )}
             </Link>
 
+            {/* Admin Dashboard Quick Access Button */}
+            {isAdmin && (
+              <Link
+                to="/admin/dashboard"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#262D42] text-[#C8A46A] text-xs font-semibold hover:bg-[#313851] transition-all shadow-xs border border-[#C8A46A]/30"
+                title="Open Admin Portal Dashboard"
+              >
+                <Shield className="w-3.5 h-3.5 text-[#C8A46A]" />
+                <span>Admin Dashboard</span>
+              </Link>
+            )}
+
             {/* Profile / Account Button */}
             <Link
-              to={user ? '/profile' : '/login'}
-              className="relative p-2 rounded-full text-[#313851] hover:text-[#9C5550] hover:bg-[#F4ECE6] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9C5550]"
-              aria-label={user ? (isAdmin ? 'Admin Portal' : 'My Account') : 'Log In'}
-              title={user ? (isAdmin ? 'Admin Portal / Profile' : 'My Profile') : 'Sign In'}
+              to={isAdmin ? '/admin/dashboard' : (user ? '/profile' : '/login')}
+              className="relative p-1.5 rounded-full text-[#313851] hover:text-[#9C5550] hover:bg-[#F4ECE6] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9C5550] flex items-center justify-center"
+              aria-label={isAdmin ? 'Admin Dashboard' : (user?.full_name?.trim() || (user ? 'My Account' : 'Sign In'))}
+              title={isAdmin ? 'Admin Dashboard' : (user?.full_name?.trim() || (user ? 'My Account' : 'Sign In'))}
             >
-              <User className="w-5 h-5" />
+              {user && user?.full_name?.trim() ? (
+                <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#9C5550] to-[#C98F8A] text-[#FFFDFC] text-xs font-heading font-bold flex items-center justify-center shadow-2xs">
+                  {user.full_name.trim().charAt(0).toUpperCase()}
+                </div>
+              ) : (
+                <User className="w-5 h-5" />
+              )}
               {user && (
-                <span className={`absolute top-1 right-1 w-2 h-2 rounded-full ${isAdmin ? 'bg-[#C8A46A]' : 'bg-emerald-500'}`} />
+                <span className={`absolute top-0.5 right-0.5 w-2 h-2 rounded-full border border-[#FFFDFC] ${isAdmin ? 'bg-[#C8A46A]' : 'bg-emerald-500'}`} />
               )}
             </Link>
 
@@ -212,7 +230,7 @@ export default function Header({ dynamicSettings }) {
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-4 py-3 rounded-2xl text-base font-semibold text-[#313851] bg-[#F6F3ED] hover:bg-[#EAE4DC]"
               >
-                {user ? `Account (${user.email?.split('@')[0]})` : 'Sign In / Register'}
+                {user ? (user.full_name?.trim() || 'My Account') : 'Sign In / Register'}
               </Link>
 
               {isAdmin && (

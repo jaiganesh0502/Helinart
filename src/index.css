@@ -159,6 +159,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 /* Form inputs (Nailsbyhelina Luxury Contact System) */
 input, select, textarea {
   border-color: #D8C6C3;
+  color: #313851;
+}
+input::placeholder, textarea::placeholder {
+  color: #8B7774;
+  opacity: 1;
 }
 input:focus, select:focus, textarea:focus {
   border-color: #C98F8A;

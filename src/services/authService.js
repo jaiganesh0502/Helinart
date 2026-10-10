@@ -3,7 +3,7 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase.js';
 const LOCAL_USERS_KEY = 'helinart_local_auth_users_v1';
 const CURRENT_SESSION_KEY = 'helinart_local_current_session_v1';
 
-// Seed demo admin & customer in local fallback
+// Fallback storage for local demonstration without credentials
 function getLocalUsers() {
   const stored = localStorage.getItem(LOCAL_USERS_KEY);
   if (stored) {
@@ -11,21 +11,11 @@ function getLocalUsers() {
   }
   const defaults = [
     {
-      id: 'usr-admin-01',
-      email: 'admin@nailsbyhelina.com',
-      password: 'adminpassword123',
-      role: 'admin',
-      full_name: 'Helina Atelier Admin',
-      phone: '+91 93614 05676',
-      created_at: new Date().toISOString()
-    },
-    {
       id: 'usr-cust-01',
-      email: 'customer@example.com',
-      password: 'password123',
+      email: 'customer@nailsbyhelina.com',
       role: 'customer',
-      full_name: 'Priya Sharma',
-      phone: '+91 98765 43210',
+      full_name: 'Verified Customer',
+      phone: '+91 98000 00000',
       created_at: new Date().toISOString()
     }
   ];
@@ -105,7 +95,10 @@ export const authService = {
       u => u.email.toLowerCase() === email.trim().toLowerCase() && u.password === password
     );
     if (!user) {
-      throw new Error('Invalid email or password. Please verify credentials.');
+      throw new Error('Invalid email or password.');
+    }
+    if (user.email.toLowerCase() === 'helina.nailart@gmail.com') {
+      user.role = 'admin';
     }
     localStorage.setItem(CURRENT_SESSION_KEY, JSON.stringify(user));
     return { user, session: { user } };
@@ -138,10 +131,29 @@ export const authService = {
         .eq('id', user.id)
         .maybeSingle();
 
+      const isHelinaAdmin = user.email?.toLowerCase() === 'helina.nailart@gmail.com';
+      const effectiveRole = isHelinaAdmin ? 'admin' : (profile?.role === 'admin' ? 'customer' : (profile?.role || 'customer'));
+
+      // If the authenticated user is the designated admin, ensure database profile matches
+      if (isHelinaAdmin && profile?.role !== 'admin') {
+        supabase
+          .from('profiles')
+          .upsert({
+            id: user.id,
+            email: user.email,
+            role: 'admin',
+            full_name: profile?.full_name || user.user_metadata?.full_name || 'Helina Admin',
+            phone: profile?.phone || user.user_metadata?.phone || '',
+            updated_at: new Date().toISOString()
+          })
+          .then(() => {})
+          .catch(() => {});
+      }
+
       return {
         ...user,
-        role: profile?.role || 'customer',
-        full_name: profile?.full_name || user.user_metadata?.full_name || '',
+        role: effectiveRole,
+        full_name: profile?.full_name || user.user_metadata?.full_name || (isHelinaAdmin ? 'Helina Admin' : ''),
         phone: profile?.phone || user.user_metadata?.phone || '',
         avatar_url: profile?.avatar_url || ''
       };
@@ -151,7 +163,11 @@ export const authService = {
     const stored = localStorage.getItem(CURRENT_SESSION_KEY);
     if (!stored) return null;
     try {
-      return JSON.parse(stored);
+      const u = JSON.parse(stored);
+      if (u && u.email?.toLowerCase() === 'helina.nailart@gmail.com') {
+        u.role = 'admin';
+      }
+      return u;
     } catch (e) {
       return null;
     }

@@ -4,6 +4,8 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 const AuthContext = createContext(null);
 
+export const ADMIN_EMAIL = 'helina.nailart@gmail.com';
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -98,13 +100,37 @@ export function AuthProvider({ children }) {
     return updated;
   };
 
-  const role = user?.role || 'customer';
-  const isAdmin = role === 'admin';
+  const isEmailAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+  const effectiveRole = isEmailAdmin ? 'admin' : (user?.role === 'admin' ? 'customer' : (user?.role || 'customer'));
+
+  const profile = user ? {
+    id: user.id,
+    email: user.email,
+    role: effectiveRole,
+    full_name: user.full_name || '',
+    phone: user.phone || '',
+    avatar_url: user.avatar_url || ''
+  } : null;
+
+  const role = effectiveRole;
+
+  // EXACT ADMIN ACCESS RULE:
+  // Requires:
+  // 1. Authenticated user exists
+  // 2. profile.role === 'admin'
+  // 3. authenticated email === 'helina.nailart@gmail.com'
+  const isAdmin = Boolean(
+    user &&
+    isEmailAdmin &&
+    role === 'admin'
+  );
 
   const value = {
     user,
+    profile,
     role,
     isAdmin,
+    ADMIN_EMAIL,
     loading,
     signIn,
     signUp,

@@ -39,18 +39,23 @@ export default function AdminDashboard() {
 
     async function loadDashboardData() {
       try {
-        const [products, orders, customers, settings] = await Promise.all([
-          productService.getProducts({ activeOnly: false }),
-          orderService.getOrders(null, true),
-          authService.getCustomers(),
-          settingsService.getSettings()
+        const [productsRes, ordersRes, customersRes, settingsRes] = await Promise.all([
+          productService.getProducts({ activeOnly: false }).catch(() => []),
+          orderService.getOrders(null, true).catch(() => []),
+          authService.getCustomers().catch(() => []),
+          settingsService.getSettings().catch(() => ({}))
         ]);
 
         if (mounted) {
-          const activeProds = products.filter(p => p.is_active);
-          const lowStock = products.filter(p => (p.stock_quantity || 0) < 30);
-          const pending = orders.filter(o => o.status === 'pending');
-          const revenue = orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+          const products = Array.isArray(productsRes) ? productsRes : [];
+          const orders = Array.isArray(ordersRes) ? ordersRes : [];
+          const customers = Array.isArray(customersRes) ? customersRes : [];
+          const settings = settingsRes || {};
+
+          const activeProds = products.filter(p => p && p.is_active);
+          const lowStock = products.filter(p => p && (Number(p.stock_quantity) || 0) < 30);
+          const pending = orders.filter(o => o && o.status === 'pending');
+          const revenue = orders.reduce((sum, o) => sum + (Number(o?.total) || 0), 0);
 
           setStats({
             totalProducts: products.length,
@@ -60,7 +65,7 @@ export default function AdminDashboard() {
             pendingOrders: pending.length,
             totalCustomers: customers.length,
             totalRevenue: revenue,
-            studioBookingEnabled: Boolean(settings.studio_booking_enabled)
+            studioBookingEnabled: Boolean(settings?.studio_booking_enabled)
           });
 
           setRecentOrders(orders.slice(0, 5));

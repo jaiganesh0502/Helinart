@@ -6,27 +6,40 @@ import {
 } from 'lucide-react';
 import { createCustomOrder } from '../api';
 import { useStore } from '../store/useStore';
+import { useAuth } from '../context/AuthContext';
 import SEO from '../components/SEO';
 
 export default function CustomOrder() {
   const { addToast } = useStore();
+  const { user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const [submittedOrder, setSubmittedOrder] = useState(null);
 
   const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    email: '',
+    name: user?.full_name || '',
+    phone: user?.phone || '',
+    email: user?.email || '',
     shape: 'Almond',
     length: 'Medium',
     sizeType: 'Preset',
     presetSize: 'M',
     customSizes: { thumb: '', index: '', middle: '', ring: '', pinky: '' },
     themes: ['Chrome Mirror', 'Bridal Luxury'],
-    colors: 'Rose Gold, Dusty Blush, Pearl White',
+    colors: '',
     notes: '',
     photoPreview: null
   });
+
+  React.useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        name: prev.name || user.full_name || '',
+        phone: prev.phone || user.phone || '',
+        email: prev.email || user.email || ''
+      }));
+    }
+  }, [user]);
 
   const shapes = ['Almond', 'Coffin', 'Square', 'Stiletto', 'Oval', 'Round'];
   const lengths = ['Short (Active)', 'Medium (Classic)', 'Long (Glam)', 'Extra Long (Editorial)'];
@@ -171,35 +184,38 @@ export default function CustomOrder() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-[#313851] mb-1">Your Full Name *</label>
+              <label className="block text-xs font-semibold text-[#313851] mb-1">Full Name *</label>
               <input
                 type="text"
                 required
+                autoComplete="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g. Shanaya Roy"
-                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
+                placeholder="Enter your full name"
+                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-[#313851] mb-1">WhatsApp Mobile *</label>
+              <label className="block text-xs font-semibold text-[#313851] mb-1">Phone Number *</label>
               <input
                 type="tel"
                 required
+                autoComplete="tel"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                placeholder="9876543210"
-                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
+                placeholder="Enter your phone number"
+                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
               />
             </div>
             <div>
               <label className="block text-xs font-semibold text-[#313851] mb-1">Email Address</label>
               <input
                 type="email"
+                autoComplete="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="shanaya@example.com"
-                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
+                placeholder="Enter your email address"
+                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
               />
             </div>
           </div>
@@ -359,8 +375,8 @@ export default function CustomOrder() {
               type="text"
               value={formData.colors}
               onChange={(e) => setFormData({ ...formData, colors: e.target.value })}
-              placeholder="e.g. Rose Gold Chrome, Sheer Milk Glaze, Champagne Gold Flakes"
-              className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
+              placeholder="Enter preferred colors (e.g. Rose Gold, Sheer Milk Glaze)"
+              className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
             />
           </div>
 

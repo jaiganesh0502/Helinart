@@ -216,7 +216,7 @@ export const initialProductReviews = {
   'sakura-chrome-luxe': [
     {
       id: 'rev-sk-1',
-      author: 'Ananya Deshmukh',
+      author: 'Verified Customer',
       rating: 5,
       date: '2026-09-14',
       verified: true,
@@ -225,7 +225,7 @@ export const initialProductReviews = {
     },
     {
       id: 'rev-sk-2',
-      author: 'Dr. Meera Nambiar',
+      author: 'Verified Buyer',
       rating: 5,
       date: '2026-09-02',
       verified: true,
@@ -234,7 +234,7 @@ export const initialProductReviews = {
     },
     {
       id: 'rev-sk-3',
-      author: 'Rhea Sen',
+      author: 'Verified Customer',
       rating: 4,
       date: '2026-08-20',
       verified: true,
@@ -243,7 +243,7 @@ export const initialProductReviews = {
     },
     {
       id: 'rev-sk-4',
-      author: 'Kavya Pillai',
+      author: 'Verified Buyer',
       rating: 5,
       date: '2026-08-11',
       verified: true,
@@ -254,7 +254,7 @@ export const initialProductReviews = {
   'crystal-micro-french': [
     {
       id: 'rev-cmf-1',
-      author: 'Pooja Hegde',
+      author: 'Verified Customer',
       rating: 5,
       date: '2026-09-28',
       verified: true,
@@ -263,7 +263,7 @@ export const initialProductReviews = {
     },
     {
       id: 'rev-cmf-2',
-      author: 'Tara Roy',
+      author: 'Verified Buyer',
       rating: 5,
       date: '2026-09-12',
       verified: true,
@@ -272,7 +272,7 @@ export const initialProductReviews = {
     },
     {
       id: 'rev-cmf-3',
-      author: 'Simran Arora',
+      author: 'Verified Customer',
       rating: 4,
       date: '2026-08-25',
       verified: true,
@@ -283,7 +283,7 @@ export const initialProductReviews = {
   'vanilla-glaze-donut': [
     {
       id: 'rev-vg-1',
-      author: 'Tanvi Shah',
+      author: 'Verified Customer',
       rating: 5,
       date: '2026-10-01',
       verified: true,
@@ -292,7 +292,7 @@ export const initialProductReviews = {
     },
     {
       id: 'rev-vg-2',
-      author: 'Ayesha Khan',
+      author: 'Verified Buyer',
       rating: 5,
       date: '2026-09-19',
       verified: true,
@@ -301,7 +301,7 @@ export const initialProductReviews = {
     },
     {
       id: 'rev-vg-3',
-      author: 'Shalini Murthy',
+      author: 'Verified Customer',
       rating: 4,
       date: '2026-08-30',
       verified: true,
@@ -312,7 +312,7 @@ export const initialProductReviews = {
   'golden-empress-stiletto': [
     {
       id: 'rev-ge-1',
-      author: 'Zoya Merchant',
+      author: 'Verified Customer',
       rating: 5,
       date: '2026-09-10',
       verified: true,
@@ -321,7 +321,7 @@ export const initialProductReviews = {
     },
     {
       id: 'rev-ge-2',
-      author: 'Divya Reddy',
+      author: 'Verified Buyer',
       rating: 5,
       date: '2026-08-15',
       verified: true,
@@ -332,7 +332,7 @@ export const initialProductReviews = {
   'atelier-sizing-kit': [
     {
       id: 'rev-sz-1',
-      author: 'Kritika Roy',
+      author: 'Verified Customer',
       rating: 5,
       date: '2026-10-02',
       verified: true,
@@ -341,7 +341,7 @@ export const initialProductReviews = {
     },
     {
       id: 'rev-sz-2',
-      author: 'Neha Verma',
+      author: 'Verified Buyer',
       rating: 5,
       date: '2026-09-22',
       verified: true,

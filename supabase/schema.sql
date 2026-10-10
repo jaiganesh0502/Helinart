@@ -235,13 +235,22 @@ ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.studio_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 
--- Helper Function: Check if current user is an Admin
+-- Helper Function: Check if current authenticated user is the designated Admin (helina.nailart@gmail.com)
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN AS $$
 BEGIN
-  RETURN EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE id = auth.uid() AND role = 'admin'
+  -- Strict multi-factor verification:
+  -- 1. Authenticated user ID exists
+  -- 2. profiles.role = 'admin'
+  -- 3. Authenticated email is strictly 'helina.nailart@gmail.com' in both profiles and auth JWT
+  RETURN (
+    LOWER(COALESCE(auth.jwt() ->> 'email', '')) = 'helina.nailart@gmail.com'
+    AND EXISTS (
+      SELECT 1 FROM public.profiles
+      WHERE id = auth.uid() 
+        AND role = 'admin'
+        AND LOWER(email) = 'helina.nailart@gmail.com'
+    )
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -257,8 +266,24 @@ CREATE POLICY "Users can update own profile"
   ON public.profiles FOR UPDATE
   USING (auth.uid() = id OR public.is_admin())
   WITH CHECK (
-    -- Non-admins cannot elevate their own role to admin
-    (public.is_admin()) OR (role = (SELECT role FROM public.profiles WHERE id = auth.uid()))
+    -- Strict anti-escalation rule:
+    -- Only existing authorized admin can update roles.
+    -- Non-admins cannot promote themselves to 'admin' under any circumstance.
+    CASE
+      WHEN public.is_admin() THEN TRUE
+      ELSE (
+        role = 'customer'
+        AND auth.uid() = id
+      )
+    END
+  );
+
+DROP POLICY IF EXISTS "Prevent public user insertion of admin role" ON public.profiles;
+CREATE POLICY "Prevent public user insertion of admin role"
+  ON public.profiles FOR INSERT
+  WITH CHECK (
+    -- Direct profile insertion from client is always restricted to customer role
+    (public.is_admin()) OR (role = 'customer')
   );
 
 -- --- Products & Categories RLS ---
@@ -589,3 +614,21 @@ INSERT INTO public.offers (id, title, description, discount_type, discount_value
 ('welcome-10', 'Welcome to the Atelier', 'Enjoy 10% off your first handcrafted press-on set.', 'percentage', 10, 'WELCOME10', 0, TRUE),
 ('festive-15', 'Couture Celebration', '15% off orders over ₹1,999.', 'percentage', 15, 'COUTURE15', 1999, TRUE)
 ON CONFLICT (id) DO NOTHING;
+
+-- =============================================================================
+-- EXCLUSIVE ATELIER ADMIN SETUP (helina.nailart@gmail.com)
+-- =============================================================================
+-- The website owner manually provisions the exclusive administrator in Supabase:
+--
+-- 1. In Supabase Dashboard -> Authentication -> Users:
+--    Click "Add User" -> "Create User"
+--    Email: helina.nailart@gmail.com
+--    Password: <Enter the secure password supplied separately>
+--    Auto Confirm User: checked
+--
+-- 2. Once created, run this SQL statement in the Supabase SQL Editor:
+--
+-- UPDATE public.profiles
+-- SET role = 'admin'
+-- WHERE LOWER(email) = 'helina.nailart@gmail.com';
+-- =============================================================================

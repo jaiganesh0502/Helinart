@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Trash2, ArrowRight } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import { useAuth } from '../context/AuthContext';
 import { getProducts } from '../api';
 import ProductCard from '../components/ProductCard';
 import EmptyState from '../components/EmptyState';
@@ -9,8 +10,12 @@ import SEO from '../components/SEO';
 
 export default function Favorites() {
   const { favorites, clearFavorites } = useStore();
+  const { user } = useAuth();
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const firstName = user?.full_name?.trim() ? user.full_name.trim().split(' ')[0] : null;
+  const headingText = firstName ? `${firstName}'s Favourites` : 'Your Favourites';
 
   useEffect(() => {
     let mounted = true;
@@ -46,7 +51,7 @@ export default function Favorites() {
             <span>Wishlist & moodboard</span>
           </div>
           <h1 className="font-heading font-medium text-3xl sm:text-4xl text-[#313851] flex items-center gap-3">
-            <span>Saved Favorites</span>
+            <span>{headingText}</span>
             {favoritedProducts.length > 0 && (
               <span className="text-sm font-semibold px-3 py-1 rounded-full bg-[#F4ECE6] text-[#793D39] border border-[#D8C6C3]">
                 {favoritedProducts.length} {favoritedProducts.length === 1 ? 'set' : 'sets'}

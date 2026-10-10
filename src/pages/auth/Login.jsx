@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth, ADMIN_EMAIL } from '../../context/AuthContext';
 import { Lock, Mail, ArrowRight, ShieldCheck, Sparkles, AlertCircle } from 'lucide-react';
 import SEO from '../../components/SEO';
 
@@ -14,7 +14,19 @@ export default function Login() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const from = location.state?.from || (user?.role === 'admin' ? '/admin/dashboard' : '/profile');
+  const isAdminLogin = location.pathname === '/admin/login' || location.state?.from?.startsWith('/admin');
+  const from = location.state?.from || (user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? '/admin/dashboard' : '/profile');
+
+  // If already logged in, route immediately
+  useEffect(() => {
+    if (user) {
+      if (user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+        navigate('/admin/dashboard', { replace: true });
+      } else if (from && !from.startsWith('/admin')) {
+        navigate(from, { replace: true });
+      }
+    }
+  }, [user, navigate, from]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,20 +37,21 @@ export default function Login() {
     setSubmitting(false);
 
     if (res.success) {
-      if (res.user?.role === 'admin') {
-        navigate('/admin/dashboard');
+      // If logging in as authorized admin, open admin dashboard
+      const isApprovedAdmin =
+        res.user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+
+      if (isApprovedAdmin) {
+        navigate('/admin/dashboard', { replace: true });
       } else {
-        navigate(from === '/admin' || from.startsWith('/admin') ? '/profile' : from);
+        // Normal customer account
+        const target = (from && !from.startsWith('/admin')) ? from : '/profile';
+        navigate(target, { replace: true });
       }
     } else {
-      setError(res.error || 'Authentication failed. Please verify credentials.');
+      // Security rule: Never reveal whether email exists, whether account is admin, or expected email
+      setError('Invalid email or password.');
     }
-  };
-
-  // Quick Demo Logins for Pair Programming & Testing
-  const handleQuickLogin = (demoEmail, demoPass) => {
-    setEmail(demoEmail);
-    setPassword(demoPass);
   };
 
   return (
@@ -55,10 +68,45 @@ export default function Login() {
           <div className="w-14 h-14 mx-auto rounded-2xl bg-[#F4ECE6] border border-[#D8C6C3] flex items-center justify-center p-2.5 shadow-2xs">
             <img src="/helinart-logo.png" alt="Nailsbyhelina Logo" className="w-9 h-9 object-contain" />
           </div>
-          <h1 className="font-heading text-3xl font-medium text-[#313851]">Welcome Back</h1>
+          <h1 className="font-heading text-3xl font-medium text-[#313851]">
+            {isAdminLogin ? 'Admin Portal Sign In' : 'Welcome Back'}
+          </h1>
           <p className="text-xs text-[#786866]">
-            Enter your credentials to access your Nailsbyhelina atelier account
+            {isAdminLogin 
+              ? 'Enter authorized administrator credentials to access the Atelier portal' 
+              : 'Enter your credentials to access your Nailsbyhelina atelier account'}
           </p>
+        </div>
+
+        {/* Portal Switcher Tabs */}
+        <div className="flex p-1 bg-[#F6F3ED] rounded-2xl border border-[#D8C6C3]">
+          <button
+            type="button"
+            onClick={() => {
+              if (isAdminLogin) navigate('/login');
+            }}
+            className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all ${
+              !isAdminLogin
+                ? 'bg-[#FFFDFC] text-[#313851] shadow-xs'
+                : 'text-[#786866] hover:text-[#313851]'
+            }`}
+          >
+            Customer Account
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (!isAdminLogin) navigate('/admin/login');
+            }}
+            className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+              isAdminLogin
+                ? 'bg-[#262D42] text-[#C8A46A] shadow-xs'
+                : 'text-[#786866] hover:text-[#313851]'
+            }`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Admin Portal</span>
+          </button>
         </div>
 
         {error && (
@@ -78,10 +126,11 @@ export default function Login() {
               <input
                 type="email"
                 required
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@example.com"
-                className="w-full pl-10 pr-4 py-3 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] focus:bg-[#FFFDFC] focus:border-[#9C5550] focus:ring-1 focus:ring-[#9C5550] outline-none transition-all"
+                placeholder={isAdminLogin ? "Enter admin email" : "Enter your email address"}
+                className="w-full pl-10 pr-4 py-3 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:border-[#9C5550] focus:ring-1 focus:ring-[#9C5550] outline-none transition-all"
               />
             </div>
           </div>
@@ -95,10 +144,11 @@ export default function Login() {
               <input
                 type="password"
                 required
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••••••"
-                className="w-full pl-10 pr-4 py-3 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] focus:bg-[#FFFDFC] focus:border-[#9C5550] focus:ring-1 focus:ring-[#9C5550] outline-none transition-all"
+                placeholder={isAdminLogin ? "Enter password" : "Enter your password"}
+                className="w-full pl-10 pr-4 py-3 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:border-[#9C5550] focus:ring-1 focus:ring-[#9C5550] outline-none transition-all"
               />
             </div>
           </div>
@@ -115,45 +165,22 @@ export default function Login() {
               </span>
             ) : (
               <>
-                <span>Sign In to Atelier</span>
+                <span>{isAdminLogin ? 'Sign In to Admin Portal' : 'Sign In to Atelier'}</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
           </button>
         </form>
 
-        {/* Quick Testing Helper */}
-        <div className="pt-2 border-t border-[#D8C6C3]/60 space-y-2">
-          <span className="text-[11px] font-semibold text-[#786866] uppercase tracking-wider block text-center">
-            Quick Demo Credentials
-          </span>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('customer@example.com', 'password123')}
-              className="p-2 rounded-xl bg-[#F6F3ED] border border-[#D8C6C3] text-left hover:bg-[#F4ECE6] transition-colors"
-            >
-              <span className="font-semibold text-[#313851] block">Customer Demo</span>
-              <span className="text-[10px] text-[#786866] block">customer@example.com</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('admin@nailsbyhelina.com', 'adminpassword123')}
-              className="p-2 rounded-xl bg-[#262D42] text-[#FFFDFC] text-left hover:bg-[#313851] transition-colors"
-            >
-              <span className="font-semibold text-[#C8A46A] block">Admin Portal</span>
-              <span className="text-[10px] text-[#C2CBD3] block">admin@nailsbyhelina.com</span>
-            </button>
+        {/* Signup Redirect - Only shown for customer portal */}
+        {!isAdminLogin && (
+          <div className="text-center text-xs text-[#786866]">
+            Don't have an account yet?{' '}
+            <Link to="/signup" className="text-[#9C5550] font-semibold hover:underline">
+              Create an account
+            </Link>
           </div>
-        </div>
-
-        {/* Signup Redirect */}
-        <div className="text-center text-xs text-[#786866]">
-          Don't have an account yet?{' '}
-          <Link to="/signup" className="text-[#9C5550] font-semibold hover:underline">
-            Create an account
-          </Link>
-        </div>
+        )}
 
       </div>
     </div>

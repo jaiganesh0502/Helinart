@@ -17,7 +17,7 @@ export const auditService = {
 
     const logRecord = {
       admin_user_id: adminUser?.id || null,
-      admin_email: adminUser?.email || 'admin@nailsbyhelina.com',
+      admin_email: adminUser?.email || 'helina.nailart@gmail.com',
       action,
       entity_type: entityType,
       entity_id: entityId ? String(entityId) : null,

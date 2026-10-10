@@ -5,11 +5,13 @@ import {
 } from 'lucide-react';
 import { getServices, getSlotAvailability, bookSlot, cancelBooking, rescheduleBooking } from '../../api';
 import { useStore } from '../../store/useStore';
+import { useAuth } from '../../context/AuthContext';
 import StudioPortfolio from '../../components/StudioPortfolio';
 import SEO from '../../components/SEO';
 
 export default function StudioBooking() {
-  const { user, addToast } = useStore();
+  const { user: storeUser, addToast } = useStore();
+  const { user: authUser } = useAuth();
 
   // Booking Flow State
   const [services, setServices] = useState([]);
@@ -20,11 +22,20 @@ export default function StudioBooking() {
   const [loadingSlots, setLoadingSlots] = useState(false);
   
   // Client Details & Policy
-  const [clientName, setClientName] = useState(user?.name || '');
-  const [clientPhone, setClientPhone] = useState(user?.phone || '');
+  const [clientName, setClientName] = useState(authUser?.full_name || storeUser?.name || '');
+  const [clientPhone, setClientPhone] = useState(authUser?.phone || storeUser?.phone || '');
+  const [clientEmail, setClientEmail] = useState(authUser?.email || '');
   const [clientNotes, setClientNotes] = useState('');
   const [policyAgreed, setPolicyAgreed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (authUser) {
+      if (authUser.full_name && !clientName) setClientName(authUser.full_name);
+      if (authUser.phone && !clientPhone) setClientPhone(authUser.phone);
+      if (authUser.email && !clientEmail) setClientEmail(authUser.email);
+    }
+  }, [authUser]);
 
   // Completed Booking State
   const [confirmedBooking, setConfirmedBooking] = useState(null);
@@ -570,37 +581,51 @@ export default function StudioBooking() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-[#313851] mb-1">Your Full Name *</label>
+                  <label className="block text-xs font-semibold text-[#313851] mb-1">Full Name *</label>
                   <input
                     type="text"
                     required
+                    autoComplete="name"
                     value={clientName}
                     onChange={(e) => setClientName(e.target.value)}
-                    placeholder="e.g. Rhea Sen"
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
+                    placeholder="Enter your full name"
+                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#313851] mb-1">Mobile Number (for SMS & WhatsApp) *</label>
+                  <label className="block text-xs font-semibold text-[#313851] mb-1">Phone Number *</label>
                   <input
                     type="tel"
                     required
+                    autoComplete="tel"
                     value={clientPhone}
                     onChange={(e) => setClientPhone(e.target.value)}
-                    placeholder="9876543210"
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
+                    placeholder="Enter your phone number"
+                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-[#313851] mb-1">Special Preferences / Reference Notes</label>
+                  <label className="block text-xs font-semibold text-[#313851] mb-1">Email Address</label>
+                  <input
+                    type="email"
+                    autoComplete="email"
+                    value={clientEmail}
+                    onChange={(e) => setClientEmail(e.target.value)}
+                    placeholder="Enter your email address"
+                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-[#313851] mb-1">Notes / Preferences</label>
                   <input
                     type="text"
                     value={clientNotes}
                     onChange={(e) => setClientNotes(e.target.value)}
-                    placeholder="e.g. Existing acrylic soak-off required / sensitive nail beds"
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
+                    placeholder="Anything you'd like us to know?"
+                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
                   />
                 </div>
               </div>

@@ -84,10 +84,11 @@ export default function Signup() {
               <input
                 type="text"
                 required
+                autoComplete="name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="Priya Sharma"
-                className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] focus:bg-[#FFFDFC] focus:border-[#9C5550] outline-none"
+                placeholder="Enter your full name"
+                className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:border-[#9C5550] outline-none"
               />
             </div>
           </div>
@@ -101,10 +102,11 @@ export default function Signup() {
               <input
                 type="email"
                 required
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="priya@example.com"
-                className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] focus:bg-[#FFFDFC] focus:border-[#9C5550] outline-none"
+                placeholder="Enter your email address"
+                className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:border-[#9C5550] outline-none"
               />
             </div>
           </div>
@@ -117,10 +119,11 @@ export default function Signup() {
               <Phone className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="tel"
+                autoComplete="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="+91 98765 43210"
-                className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] focus:bg-[#FFFDFC] focus:border-[#9C5550] outline-none"
+                placeholder="Enter your phone number"
+                className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:border-[#9C5550] outline-none"
               />
             </div>
           </div>
@@ -135,27 +138,29 @@ export default function Signup() {
                 <input
                   type="password"
                   required
+                  autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full pl-10 pr-3 py-2.5 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] focus:bg-[#FFFDFC] focus:border-[#9C5550] outline-none"
+                  placeholder="Create a password"
+                  className="w-full pl-10 pr-3 py-2.5 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:border-[#9C5550] outline-none"
                 />
               </div>
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-[#313851] uppercase tracking-wider mb-1">
-                Confirm
+                Confirm Password
               </label>
               <div className="relative">
                 <Lock className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="password"
                   required
+                  autoComplete="new-password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full pl-10 pr-3 py-2.5 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] focus:bg-[#FFFDFC] focus:border-[#9C5550] outline-none"
+                  placeholder="Confirm your password"
+                  className="w-full pl-10 pr-3 py-2.5 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:border-[#9C5550] outline-none"
                 />
               </div>
             </div>
