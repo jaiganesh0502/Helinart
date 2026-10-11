@@ -10,9 +10,9 @@ const LUXURY_EASE = [0.22, 1, 0.36, 1];
 export default function Reveal({
   children,
   delay = 0,
-  duration = 0.55,
-  y = 24,
-  amount = 0.18,
+  duration = 0.5,
+  y = 16,
+  amount = 0.05,
   once = true,
   className = '',
   as = 'div'

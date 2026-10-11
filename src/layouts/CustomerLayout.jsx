@@ -19,16 +19,16 @@ export default function CustomerLayout({ children }) {
     let mounted = true;
     async function loadGlobalCms() {
       try {
-        const [s, c] = await Promise.all([
+        const [sRes, cRes] = await Promise.allSettled([
           settingsService.getSettings(),
           contentService.getPublishedContent()
         ]);
         if (mounted) {
-          if (s) setSettings(s);
-          if (c) setContent(c);
+          if (sRes.status === 'fulfilled' && sRes.value) setSettings(sRes.value);
+          if (cRes.status === 'fulfilled' && cRes.value) setContent(cRes.value);
         }
       } catch (err) {
-        // fallback
+        console.warn('Global CMS load fallback', err);
       }
     }
     loadGlobalCms();

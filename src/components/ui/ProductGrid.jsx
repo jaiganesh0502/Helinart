@@ -16,13 +16,13 @@ const gridVariants = {
 export const productItemVariants = {
   hidden: {
     opacity: 0,
-    y: 28
+    y: 18
   },
   visible: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.5,
+      duration: 0.45,
       ease: LUXURY_EASE
     }
   }
@@ -54,7 +54,8 @@ export default function ProductGrid({
       whileInView="visible"
       viewport={{
         once: true,
-        amount: 0.18
+        amount: 0.04,
+        margin: "0px 0px -30px 0px"
       }}
       className={className}
     >

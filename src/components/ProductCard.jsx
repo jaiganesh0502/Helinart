@@ -42,6 +42,10 @@ export default function ProductCard({ product }) {
   return (
     <motion.div
       variants={productItemVariants}
+      initial={shouldReduceMotion ? { opacity: 1, y: 0 } : undefined}
+      animate={shouldReduceMotion ? { opacity: 1, y: 0 } : undefined}
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.05 }}
       whileHover={shouldReduceMotion ? {} : {
         y: -4,
         borderColor: 'rgba(201, 143, 138, 0.35)',

@@ -15,24 +15,27 @@ export default function Favorites() {
   const { user } = useAuth();
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const firstName = user?.full_name?.trim() ? user.full_name.trim().split(' ')[0] : null;
   const headingText = firstName ? `${firstName}'s Favourites` : 'Your Favourites';
 
-  useEffect(() => {
-    let mounted = true;
-    async function load() {
-      try {
-        const data = await getProducts();
-        if (mounted) setAllProducts(data);
-      } catch (err) {
-        console.error('Failed to load products for favorites', err);
-      } finally {
-        if (mounted) setLoading(false);
-      }
+  const load = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getProducts();
+      setAllProducts(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Failed to load products for favorites', err);
+      setError('We couldn’t load your saved favorites right now.');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     load();
-    return () => { mounted = false; };
   }, []);
 
   // Filter products by current favorited IDs
@@ -85,7 +88,7 @@ export default function Favorites() {
         )}
       </Reveal>
 
-      {/* Grid or Empty State */}
+      {/* 4 Distinct UI States: loading, error, empty, data */}
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((item) => (
@@ -98,6 +101,17 @@ export default function Favorites() {
               <div className="h-4 bg-[#F4ECE6] rounded w-1/2" />
             </div>
           ))}
+        </div>
+      ) : error ? (
+        <div className="text-center py-16 px-4 rounded-3xl bg-[#FFFDFC] border border-[#D8C6C3]/60 max-w-lg mx-auto space-y-4">
+          <p className="text-base font-medium text-[#313851]">{error}</p>
+          <p className="text-xs text-[#786866]">Please check your network connection and try again.</p>
+          <button
+            onClick={load}
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-medium text-white bg-[#9C5550] hover:bg-[#8A4743] transition-colors"
+          >
+            Try Again
+          </button>
         </div>
       ) : favoritedProducts.length === 0 ? (
         <EmptyState

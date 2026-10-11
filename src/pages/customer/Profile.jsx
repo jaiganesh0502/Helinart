@@ -23,10 +23,15 @@ export default function Profile() {
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
-    await updateProfile({ fullName, phone });
-    setSaving(false);
-    setSavedMessage(true);
-    setTimeout(() => setSavedMessage(false), 3000);
+    try {
+      await updateProfile({ fullName, phone });
+      setSavedMessage(true);
+      setTimeout(() => setSavedMessage(false), 3000);
+    } catch (err) {
+      console.error('Failed to update profile', err);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleLogout = async () => {

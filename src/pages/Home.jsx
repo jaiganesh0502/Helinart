@@ -113,19 +113,22 @@ export default function Home() {
     let mounted = true;
     async function loadData() {
       try {
-        const [all, cmsContent, settings, catsData] = await Promise.all([
+        const [allRes, cmsRes, settingsRes, catsRes] = await Promise.allSettled([
           getProducts(),
           contentService.getPublishedContent(),
           settingsService.getSettings(),
           categoryService.getCategories({ activeOnly: true })
         ]);
         if (mounted) {
-          const picks = all.filter(p => p.isBestSeller || p.is_bestseller || p.isNew || p.is_new).slice(0, 4);
-          setFeaturedProducts(picks.length ? picks : all.slice(0, 4));
-          if (cmsContent) setHomeContent(cmsContent);
-          if (settings) setSiteSettings(settings);
-          if (catsData && catsData.length > 0) {
-            const mapped = catsData.map(c => ({
+          const all = allRes.status === 'fulfilled' && Array.isArray(allRes.value) ? allRes.value : [];
+          if (all.length > 0) {
+            const picks = all.filter(p => p.isBestSeller || p.is_bestseller || p.isNew || p.is_new).slice(0, 4);
+            setFeaturedProducts(picks.length ? picks : all.slice(0, 4));
+          }
+          if (cmsRes.status === 'fulfilled' && cmsRes.value) setHomeContent(cmsRes.value);
+          if (settingsRes.status === 'fulfilled' && settingsRes.value) setSiteSettings(settingsRes.value);
+          if (catsRes.status === 'fulfilled' && catsRes.value && catsRes.value.length > 0) {
+            const mapped = catsRes.value.map(c => ({
               name: c.slug || c.name,
               title: c.name,
               desc: c.description || 'Artisan handcrafted press-on sets.',
@@ -395,12 +398,19 @@ export default function Home() {
               </div>
             ))}
           </div>
-        ) : (
+        ) : featuredProducts.length > 0 ? (
           <ProductGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {featuredProducts.map(product => (
               <ProductCard key={product.id} product={product} />
             ))}
           </ProductGrid>
+        ) : (
+          <div className="text-center py-12 rounded-3xl bg-[#FFFDFC] border border-[#D8C6C3]/60 p-8 space-y-4">
+            <p className="text-[#786866] text-sm">New artisan collection drops launching soon.</p>
+            <Link to="/shop" className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#313851] text-white text-xs tracking-wider uppercase font-medium hover:bg-[#202537] transition-colors">
+              Explore All Designs
+            </Link>
+          </div>
         )}
       </section>
 

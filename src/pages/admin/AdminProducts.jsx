@@ -34,12 +34,16 @@ export default function AdminProducts() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [prods, cats] = await Promise.all([
+      const [prodsRes, catsRes] = await Promise.allSettled([
         productService.getProducts({ activeOnly: false }),
         categoryService.getCategories({ activeOnly: false })
       ]);
-      setProducts(prods);
-      setCategories(cats);
+      if (prodsRes.status === 'fulfilled' && Array.isArray(prodsRes.value)) {
+        setProducts(prodsRes.value);
+      }
+      if (catsRes.status === 'fulfilled' && Array.isArray(catsRes.value)) {
+        setCategories(catsRes.value);
+      }
     } catch (err) {
       console.error('Failed to load products', err);
     } finally {

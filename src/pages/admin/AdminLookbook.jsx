@@ -18,12 +18,16 @@ export default function AdminLookbook() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [lbItems, prods] = await Promise.all([
+      const [lbItemsRes, prodsRes] = await Promise.allSettled([
         lookbookService.getLookbookItems({ activeOnly: false }),
         productService.getProducts({ activeOnly: false })
       ]);
-      setItems(lbItems);
-      setProducts(prods);
+      if (lbItemsRes.status === 'fulfilled' && Array.isArray(lbItemsRes.value)) {
+        setItems(lbItemsRes.value);
+      }
+      if (prodsRes.status === 'fulfilled' && Array.isArray(prodsRes.value)) {
+        setProducts(prodsRes.value);
+      }
     } catch (err) {
       console.error('Failed to load lookbook', err);
     } finally {

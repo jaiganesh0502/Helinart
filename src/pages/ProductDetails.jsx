@@ -61,41 +61,55 @@ export default function ProductDetails() {
     }
   }, [authUser]);
 
+  const [loadError, setLoadError] = useState(null);
+
   const { toggleFavorite, isFavorite, addToCart, addRecentlyViewed, requestStockNotification, addToast } = useStore();
 
-  useEffect(() => {
-    let mounted = true;
-    async function loadData() {
-      setLoading(true);
-      try {
-        const [prod, settings] = await Promise.all([
-          getProductById(id),
-          settingsService.getSettings()
-        ]);
-        if (mounted) {
-          if (settings) setSiteSettings(settings);
-          setProduct(prod);
-          setSelectedImage(prod.image);
-          setSelectedShape(prod.shapes && prod.shapes.length > 0 ? prod.shapes[0] : 'Universal');
-          if (prod.denominations && prod.denominations.length > 0) {
-            setSelectedDenomination(prod.denominations[1] || prod.denominations[0]);
-          }
-          addRecentlyViewed(prod.id);
+  const loadData = async () => {
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const [prodRes, settingsRes] = await Promise.allSettled([
+        getProductById(id),
+        settingsService.getSettings()
+      ]);
 
-          // Fetch reviews
-          const revs = await getProductReviews(prod.id);
-          if (mounted) setReviews(revs);
+      if (prodRes.status === 'fulfilled' && prodRes.value) {
+        const prod = prodRes.value;
+        setProduct(prod);
+        setSelectedImage(prod.image);
+        setSelectedShape(prod.shapes && prod.shapes.length > 0 ? prod.shapes[0] : 'Universal');
+        if (prod.denominations && prod.denominations.length > 0) {
+          setSelectedDenomination(prod.denominations[1] || prod.denominations[0]);
         }
-      } catch (err) {
-        console.error('Failed to load product', err);
-      } finally {
-        if (mounted) setLoading(false);
+        addRecentlyViewed(prod.id);
+
+        try {
+          const revs = await getProductReviews(prod.id);
+          setReviews(Array.isArray(revs) ? revs : []);
+        } catch (revErr) {
+          console.warn('Reviews failed to load', revErr);
+        }
+      } else if (prodRes.status === 'rejected') {
+        console.error('Product fetch failed:', prodRes.reason);
+        setLoadError('Failed to load product details.');
       }
+
+      if (settingsRes.status === 'fulfilled' && settingsRes.value) {
+        setSiteSettings(settingsRes.value);
+      }
+    } catch (err) {
+      console.error('Failed to load product', err);
+      setLoadError('Failed to load product details.');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     loadData();
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    return () => { mounted = false; };
-  }, [id, addRecentlyViewed]);
+  }, [id]);
 
 
   const handlePincodeCheck = async (e) => {
@@ -165,6 +179,26 @@ export default function ProductDetails() {
             <div className="h-6 bg-[#F4ECE6] rounded w-1/4" />
             <div className="h-32 bg-[#F4ECE6] rounded" />
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="max-w-md mx-auto text-center py-20 px-4 space-y-4">
+        <h2 className="font-heading font-medium text-2xl text-[#313851]">Unable to Load Product</h2>
+        <p className="text-sm text-[#786866]">We encountered a connection issue loading this product.</p>
+        <div className="flex items-center justify-center gap-3 mt-4">
+          <button
+            onClick={loadData}
+            className="px-6 py-2.5 rounded-full bg-[#9C5550] text-[#FFFDFC] text-sm font-semibold hover:bg-[#8A4743] transition-colors"
+          >
+            Try Again
+          </button>
+          <Link to="/shop" className="px-6 py-2.5 rounded-full bg-[#F4ECE6] text-[#313851] text-sm font-semibold hover:bg-[#EAE1DA] transition-colors">
+            Return to Shop
+          </Link>
         </div>
       </div>
     );

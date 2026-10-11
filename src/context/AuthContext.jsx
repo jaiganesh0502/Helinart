@@ -16,12 +16,53 @@ export function AuthProvider({ children }) {
 
     async function initAuth() {
       try {
-        const current = await authService.getCurrentUser();
-        if (mounted) {
-          setUser(current);
+        if (!isSupabaseConfigured) {
+          const current = await authService.getCurrentUser();
+          if (mounted) {
+            setUser(current);
+          }
+          return;
+        }
+
+        // 1. Instant local session check (0ms network latency)
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) {
+          console.warn('[AUTH] getSession warning:', sessionError);
+        }
+
+        if (session?.user) {
+          // Immediately set base user from session so route guards & UI do not wait
+          const isHelinaAdmin = session.user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+          if (mounted) {
+            setUser({
+              ...session.user,
+              role: isHelinaAdmin ? 'admin' : 'customer'
+            });
+          }
+
+          // 2. Asynchronously sync full profile with 3-second timeout protection
+          try {
+            const profilePromise = authService.getCurrentUser();
+            const timeoutPromise = new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('Profile sync timeout')), 3000)
+            );
+            const current = await Promise.race([profilePromise, timeoutPromise]);
+            if (mounted && current) {
+              setUser(current);
+            }
+          } catch (profileErr) {
+            console.warn('[AUTH] Profile sync warning (using cached user):', profileErr.message);
+          }
+        } else {
+          if (mounted) {
+            setUser(null);
+          }
         }
       } catch (err) {
-        console.error('Auth initialization error', err);
+        console.error('[AUTH] initialization error:', err);
+        if (mounted) {
+          setUser(null);
+        }
       } finally {
         if (mounted) {
           setLoading(false);
@@ -31,13 +72,20 @@ export function AuthProvider({ children }) {
 
     initAuth();
 
-    // Listen to Supabase Auth State changes if configured
+    // Listen to Supabase Auth State changes once
     let authListener = null;
     if (isSupabaseConfigured) {
       const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
         if (session?.user) {
-          const profileUser = await authService.getCurrentUser();
-          if (mounted) setUser(profileUser);
+          try {
+            const profileUser = await authService.getCurrentUser();
+            if (mounted) setUser(profileUser);
+          } catch (e) {
+            if (mounted) {
+              const isHelinaAdmin = session.user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+              setUser({ ...session.user, role: isHelinaAdmin ? 'admin' : 'customer' });
+            }
+          }
         } else {
           if (mounted) setUser(null);
         }

@@ -8,12 +8,14 @@ import FilterBar from '../components/FilterBar';
 import EmptyState from '../components/EmptyState';
 import SEO from '../components/SEO';
 import { categoryService } from '../services/categoryService';
+import { AlertCircle, RotateCcw } from 'lucide-react';
 
 export default function Shop() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [allProducts, setAllProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Search & Filter state synced with URL search params
   const categoryParam = searchParams.get('category') || 'All';
@@ -33,26 +35,35 @@ export default function Shop() {
     }
   }, [searchParams]);
 
-  useEffect(() => {
-    let mounted = true;
-    async function load() {
-      try {
-        const [prodData, catsData] = await Promise.all([
-          getProducts(),
-          categoryService.getCategories({ activeOnly: true })
-        ]);
-        if (mounted) {
-          setAllProducts(prodData);
-          if (catsData && catsData.length > 0) setCategories(catsData);
-        }
-      } catch (err) {
-        console.error('Failed to load products or categories', err);
-      } finally {
-        if (mounted) setLoading(false);
+  const load = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [prodRes, catsRes] = await Promise.allSettled([
+        getProducts(),
+        categoryService.getCategories({ activeOnly: true })
+      ]);
+
+      if (prodRes.status === 'fulfilled' && Array.isArray(prodRes.value)) {
+        setAllProducts(prodRes.value);
+      } else {
+        console.error('Failed to load products', prodRes.reason);
+        setError('Unable to load catalog products at this moment.');
       }
+
+      if (catsRes.status === 'fulfilled' && catsRes.value?.length > 0) {
+        setCategories(catsRes.value);
+      }
+    } catch (err) {
+      console.error('Unexpected shop load error', err);
+      setError('An unexpected issue occurred while loading items.');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     load();
-    return () => { mounted = false; };
   }, []);
 
   // Filter & Sort Logic
@@ -168,6 +179,25 @@ export default function Shop() {
               <div className="h-8 bg-[#F4ECE6] rounded-full" />
             </div>
           ))}
+        </div>
+      ) : error ? (
+        <div className="py-16 text-center space-y-4 bg-[#FFFDFC] rounded-3xl border border-[#D8C6C3] p-8 max-w-md mx-auto shadow-xs">
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-[#FDF2F1] text-[#9C5550] flex items-center justify-center">
+            <AlertCircle className="w-7 h-7" />
+          </div>
+          <h2 className="font-heading text-2xl text-[#313851]">We couldn't load this right now</h2>
+          <p className="text-xs text-[#786866] leading-relaxed">
+            {error} Please check your connection or try again.
+          </p>
+          <div className="pt-2">
+            <button
+              onClick={() => load()}
+              className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full bg-[#9C5550] text-[#FFFDFC] text-xs font-semibold hover:bg-[#8A4743] transition-colors shadow-xs"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Try Again</span>
+            </button>
+          </div>
         </div>
       ) : products.length === 0 ? (
         <EmptyState

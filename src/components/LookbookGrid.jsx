@@ -124,7 +124,7 @@ export default function LookbookGrid() {
       <motion.div
         initial={shouldReduceMotion ? {} : { opacity: 0, y: 14 }}
         whileInView={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
+        viewport={{ once: true, amount: 0.05 }}
         transition={{ duration: 0.5, ease: LUXURY_EASE }}
         className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8"
       >
@@ -161,7 +161,7 @@ export default function LookbookGrid() {
         variants={gridVariants}
         initial={shouldReduceMotion ? "visible" : "hidden"}
         whileInView="visible"
-        viewport={{ once: true, amount: 0.18 }}
+        viewport={{ once: true, amount: 0.05, margin: "0px 0px -30px 0px" }}
         className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"
       >
         {lookbookItems.map((item) => (

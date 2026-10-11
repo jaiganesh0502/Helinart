@@ -14,13 +14,17 @@ export default function AdminCustomers() {
     let mounted = true;
     async function load() {
       try {
-        const [custs, ords] = await Promise.all([
+        const [custsRes, ordsRes] = await Promise.allSettled([
           authService.getCustomers(),
           orderService.getOrders(null, true)
         ]);
         if (mounted) {
-          setCustomers(custs);
-          setOrders(ords);
+          if (custsRes.status === 'fulfilled' && Array.isArray(custsRes.value)) {
+            setCustomers(custsRes.value);
+          }
+          if (ordsRes.status === 'fulfilled' && Array.isArray(ordsRes.value)) {
+            setOrders(ordsRes.value);
+          }
         }
       } catch (err) {
         console.error('Failed to load customers', err);
