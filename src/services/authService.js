@@ -145,7 +145,6 @@ export const authService = {
     const newUser = {
       id: 'usr-' + Date.now(),
       email: cleanEmail,
-      password,
       role: 'customer', // Forced
       full_name: cleanName,
       phone: cleanPhone,
@@ -263,6 +262,20 @@ export const authService = {
       if (error) console.error('Supabase signout error', error);
     }
     localStorage.removeItem(CURRENT_SESSION_KEY);
+
+    // Audit and purge any legacy or temporary credential keys
+    const credentialKeysToRemove = [
+      'email', 'loginEmail', 'rememberedEmail', 'userEmail', 
+      'adminEmail', 'savedEmail', 'loginPassword', 'savedPassword',
+      'password', 'helinart_user_v1', 'helinart_current_user_v1'
+    ];
+    credentialKeysToRemove.forEach(k => {
+      try {
+        localStorage.removeItem(k);
+        sessionStorage.removeItem(k);
+      } catch (e) {}
+    });
+
     return true;
   },
 

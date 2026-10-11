@@ -21,6 +21,12 @@ export default function Signup() {
   const [resending, setResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
 
+  React.useEffect(() => {
+    setPassword('');
+    setConfirmPassword('');
+    setError('');
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -44,6 +50,10 @@ export default function Signup() {
       phone
     });
     setSubmitting(false);
+
+    // Immediately clear passwords from memory
+    setPassword('');
+    setConfirmPassword('');
 
     if (res.success) {
       if (res.needsEmailConfirmation) {
@@ -165,7 +175,7 @@ export default function Signup() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-3.5">
+            <form onSubmit={handleSubmit} autoComplete="off" className="space-y-3.5">
               <div>
                 <label className="block text-xs font-semibold text-[#313851] uppercase tracking-wider mb-1">
                   FULL NAME

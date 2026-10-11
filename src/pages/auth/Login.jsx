@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth, ADMIN_EMAIL } from '../../context/AuthContext';
-import { Lock, Mail, ArrowRight, ShieldCheck, AlertCircle, Send, CheckCircle2 } from 'lucide-react';
+import { Lock, Mail, ArrowRight, ShieldCheck, AlertCircle, Send, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import SEO from '../../components/SEO';
 
 export default function Login() {
@@ -9,19 +9,39 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Strict: Always initialize to empty strings - never from storage or props
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [resending, setResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
   const [justVerified, setJustVerified] = useState(false);
 
+  // Clear form explicitly whenever /login mounts or path/tab changes
   useEffect(() => {
+    setEmail('');
+    setPassword('');
+    setShowPassword(false);
+    setError('');
+
+    // Remove any legacy credential keys from storage
+    const credentialKeys = [
+      'email', 'loginEmail', 'rememberedEmail', 'userEmail',
+      'adminEmail', 'savedEmail', 'loginPassword', 'savedPassword', 'password'
+    ];
+    credentialKeys.forEach(k => {
+      try {
+        localStorage.removeItem(k);
+        sessionStorage.removeItem(k);
+      } catch (e) {}
+    });
+
     if (typeof window !== 'undefined' && (window.location.hash.includes('type=signup') || window.location.hash.includes('access_token'))) {
       setJustVerified(true);
     }
-  }, []);
+  }, [location.pathname]);
 
   const isAdminLogin = location.pathname === '/admin/login' || location.state?.from?.startsWith('/admin');
   const from = location.state?.from || (user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? '/admin/dashboard' : '/profile');
@@ -49,18 +69,20 @@ export default function Login() {
     setSubmitting(false);
 
     if (res.success) {
-      // If logging in as authorized admin, open admin dashboard
+      // Clear password from component memory immediately on success
+      setPassword('');
       const isApprovedAdmin =
         res.user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
       if (isApprovedAdmin) {
         navigate('/admin/dashboard', { replace: true });
       } else {
-        // Normal customer account
         const target = (from && !from.startsWith('/admin')) ? from : '/';
         navigate(target, { replace: true });
       }
     } else {
+      // Clear password on failure for security; keep email so user can fix a typo
+      setPassword('');
       setError(res.error || 'Invalid email or password.');
     }
   };
@@ -80,6 +102,15 @@ export default function Login() {
     } else {
       setError(res.error || 'Failed to resend verification email.');
     }
+  };
+
+  const handleTabSwitch = (toAdmin) => {
+    setEmail('');
+    setPassword('');
+    setShowPassword(false);
+    setError('');
+    setResendSuccess(false);
+    navigate(toAdmin ? '/admin/login' : '/login');
   };
 
   return (
@@ -110,9 +141,7 @@ export default function Login() {
         <div className="flex p-1 bg-[#F6F3ED] rounded-2xl border border-[#D8C6C3]">
           <button
             type="button"
-            onClick={() => {
-              if (isAdminLogin) navigate('/login');
-            }}
+            onClick={() => handleTabSwitch(false)}
             className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all ${
               !isAdminLogin
                 ? 'bg-[#FFFDFC] text-[#313851] shadow-xs'
@@ -123,9 +152,7 @@ export default function Login() {
           </button>
           <button
             type="button"
-            onClick={() => {
-              if (!isAdminLogin) navigate('/admin/login');
-            }}
+            onClick={() => handleTabSwitch(true)}
             className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
               isAdminLogin
                 ? 'bg-[#262D42] text-[#C8A46A] shadow-xs'
@@ -179,17 +206,18 @@ export default function Login() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-[#313851] uppercase tracking-wider mb-1.5">
-              Email Address
+              EMAIL ADDRESS
             </label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Mail className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="email"
+                name="nbh-login-email"
                 required
-                autoComplete="email"
+                autoComplete="off"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={isAdminLogin ? "Enter admin email" : "Enter your email address"}
@@ -201,7 +229,7 @@ export default function Login() {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="block text-xs font-semibold text-[#313851] uppercase tracking-wider">
-                Password
+                PASSWORD
               </label>
               {!isAdminLogin && (
                 <Link
@@ -213,16 +241,26 @@ export default function Login() {
               )}
             </div>
             <div className="relative">
-              <Lock className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Lock className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
+                name="nbh-login-password"
                 required
-                autoComplete="current-password"
+                autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={isAdminLogin ? "Enter password" : "Enter your password"}
-                className="w-full pl-10 pr-4 py-3 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:border-[#9C5550] focus:ring-1 focus:ring-[#9C5550] outline-none transition-all"
+                className="w-full pl-10 pr-11 py-3 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:border-[#9C5550] focus:ring-1 focus:ring-[#9C5550] outline-none transition-all"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#786866] hover:text-[#313851] transition-colors p-1"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
           </div>
 

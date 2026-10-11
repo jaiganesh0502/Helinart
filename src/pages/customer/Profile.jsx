@@ -31,7 +31,7 @@ export default function Profile() {
 
   const handleLogout = async () => {
     await signOut();
-    navigate('/');
+    navigate('/login');
   };
 
   return (
