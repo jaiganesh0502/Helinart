@@ -38,6 +38,7 @@ import Orders from './pages/customer/Orders';
 import OrderDetail from './pages/customer/OrderDetail';
 
 // Admin Portal Pages
+import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminProductForm from './pages/admin/AdminProductForm';
@@ -132,7 +133,7 @@ export default function App() {
         {/* ===================================================================
             2. ADMIN PORTAL ROUTES (Protected by AdminRoute and Database RLS)
             =================================================================== */}
-        <Route path="/admin/login" element={<Login />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
         <Route
           path="/admin"
           element={

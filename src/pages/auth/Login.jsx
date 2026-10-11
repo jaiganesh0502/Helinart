@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth, ADMIN_EMAIL } from '../../context/AuthContext';
-import { Lock, Mail, ArrowRight, ShieldCheck, AlertCircle, Send, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { Lock, Mail, ArrowRight, AlertCircle, Send, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import SEO from '../../components/SEO';
 
 export default function Login() {
@@ -31,8 +31,7 @@ export default function Login() {
     }
   }, [location.pathname]);
 
-  const isAdminLogin = location.pathname === '/admin/login' || location.state?.from?.startsWith('/admin');
-  const from = location.state?.from || (user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? '/admin/dashboard' : '/profile');
+  const from = location.state?.from;
 
   // If already logged in, route immediately
   useEffect(() => {
@@ -42,7 +41,7 @@ export default function Login() {
       } else if (from && !from.startsWith('/admin')) {
         navigate(from, { replace: true });
       } else {
-        navigate('/', { replace: true });
+        navigate('/profile', { replace: true });
       }
     }
   }, [user, navigate, from]);
@@ -64,7 +63,8 @@ export default function Login() {
       if (isApprovedAdmin) {
         navigate('/admin/dashboard', { replace: true });
       } else {
-        const target = (from && !from.startsWith('/admin')) ? from : '/';
+        // Customer login: redirect to customer website (profile or customer return page)
+        const target = (from && !from.startsWith('/admin')) ? from : '/profile';
         navigate(target, { replace: true });
       }
     } else {
@@ -89,23 +89,14 @@ export default function Login() {
     }
   };
 
-  const handleTabSwitch = (toAdmin) => {
-    setEmail('');
-    setPassword('');
-    setShowPassword(false);
-    setError('');
-    setResendSuccess(false);
-    navigate(toAdmin ? '/admin/login' : '/login');
-  };
-
   return (
     <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <SEO 
-        title={isAdminLogin ? "Admin Sign In | Nailsbyhelina Atelier" : "Sign In | Nailsbyhelina Haute Couture Atelier"}
+        title="Sign In | Nailsbyhelina Haute Couture Atelier"
         description="Sign in to your Nailsbyhelina account to manage orders, favorites, and studio bookings."
       />
 
-      <div className="max-w-md w-full space-y-8 bg-[#FFFDFC] p-8 sm:p-10 rounded-3xl border border-[#D8C6C3] shadow-md">
+      <div className="max-w-md w-full bg-[#FFFDFC] p-8 sm:p-10 rounded-3xl border border-[#D8C6C3] shadow-md">
         
         {/* Brand Header */}
         <div className="text-center space-y-2">
@@ -113,162 +104,58 @@ export default function Login() {
             <img src="/helinart-logo.png" alt="Nailsbyhelina Logo" className="w-9 h-9 object-contain" />
           </div>
           <h1 className="font-heading text-3xl font-medium text-[#313851]">
-            {isAdminLogin ? 'Admin Portal Sign In' : 'Welcome Back'}
+            Welcome Back
           </h1>
           <p className="text-xs text-[#786866]">
-            {isAdminLogin 
-              ? 'Enter authorized administrator credentials to access the Atelier portal' 
-              : 'Enter your email address and password to sign in'}
+            Enter your email address and password to sign in
           </p>
         </div>
 
-        {/* Portal Switcher Tabs */}
-        <div className="flex p-1 bg-[#F6F3ED] rounded-2xl border border-[#D8C6C3]">
-          <button
-            type="button"
-            onClick={() => handleTabSwitch(false)}
-            className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all ${
-              !isAdminLogin
-                ? 'bg-[#FFFDFC] text-[#313851] shadow-xs'
-                : 'text-[#786866] hover:text-[#313851]'
-            }`}
-          >
-            Customer Account
-          </button>
-          <button
-            type="button"
-            onClick={() => handleTabSwitch(true)}
-            className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
-              isAdminLogin
-                ? 'bg-[#262D42] text-[#C8A46A] shadow-xs'
-                : 'text-[#786866] hover:text-[#313851]'
-            }`}
-          >
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Admin Portal</span>
-          </button>
-        </div>
-
-        {justVerified && (
-          <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Email verified successfully! You can now sign in to your atelier account.</span>
-          </div>
-        )}
-
-        {resendSuccess && (
-          <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Verification email resent! Please check your inbox and <strong>Spam</strong> folder.</span>
-          </div>
-        )}
-
-        {error && (
-          <div className="p-3.5 rounded-2xl bg-[#FDF2F1] border border-[#F5C2BF] text-xs text-[#9C5550] space-y-2.5">
-            <div className="flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-              <div className="flex-1 leading-relaxed">
-                <span>{error}</span>
-              </div>
+        {/* 24-32px balanced gap between description and form / alerts */}
+        <div className="mt-7 space-y-5">
+          {justVerified && (
+            <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Email verified successfully! You can now sign in to your atelier account.</span>
             </div>
+          )}
 
-            {(error.includes('verify your email') || error.includes('rate limit')) && (
-              <div className="pt-2 border-t border-[#F5C2BF]/50 space-y-2">
-                <p className="text-[11px] text-[#786866] leading-relaxed">
-                  💡 <strong>Tip:</strong> Supabase confirmation emails often land in your <strong>Spam / Junk</strong> folder (sender: <code>noreply@mail.app.supabase.io</code>).
-                </p>
-                <button
-                  type="button"
-                  onClick={handleResendVerification}
-                  disabled={resending}
-                  className="px-3 py-1.5 rounded-xl bg-[#9C5550] text-[#FFFDFC] text-xs font-semibold hover:bg-[#8A4743] transition-colors flex items-center gap-1.5 disabled:opacity-50"
-                >
-                  <Send className="w-3 h-3" />
-                  <span>{resending ? 'Sending...' : 'Resend Verification Email'}</span>
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {isAdminLogin ? (
-          /* ===================================================================
-             3. ADMIN LOGIN FORM (Standard browser password manager autofill)
-             =================================================================== */
-          <form onSubmit={handleSubmit} autoComplete="on" className="space-y-4">
-            <div>
-              <label htmlFor="login-email" className="block text-xs font-semibold text-[#313851] uppercase tracking-wider mb-1.5">
-                EMAIL ADDRESS
-              </label>
-              <div className="relative">
-                <Mail className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                <input
-                  id="login-email"
-                  name="username"
-                  type="email"
-                  required
-                  autoComplete="username"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter admin email"
-                  className="w-full pl-10 pr-4 py-3 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:border-[#9C5550] focus:ring-1 focus:ring-[#9C5550] outline-none transition-all"
-                />
-              </div>
+          {resendSuccess && (
+            <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Verification email resent! Please check your inbox and <strong>Spam</strong> folder.</span>
             </div>
+          )}
 
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label htmlFor="login-password" className="block text-xs font-semibold text-[#313851] uppercase tracking-wider">
-                  PASSWORD
-                </label>
+          {error && (
+            <div className="p-3.5 rounded-2xl bg-[#FDF2F1] border border-[#F5C2BF] text-xs text-[#9C5550] space-y-2.5">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <div className="flex-1 leading-relaxed">
+                  <span>{error}</span>
+                </div>
               </div>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                <input
-                  id="login-password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter password"
-                  className="w-full pl-10 pr-11 py-3 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:border-[#9C5550] focus:ring-1 focus:ring-[#9C5550] outline-none transition-all"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  tabIndex={-1}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#786866] hover:text-[#313851] transition-colors p-1"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
 
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full py-3.5 rounded-full bg-gradient-to-r from-[#B26661] via-[#9C5550] to-[#8A4743] text-[#FFFDFC] text-sm font-semibold tracking-wide shadow-xs hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
-            >
-              {submitting ? (
-                <span className="flex items-center gap-2">
-                  <span className="w-4 h-4 border-2 border-[#FFFDFC] border-t-transparent rounded-full animate-spin" />
-                  Signing In...
-                </span>
-              ) : (
-                <>
-                  <span>Sign In to Admin Portal</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
+              {(error.includes('verify your email') || error.includes('rate limit')) && (
+                <div className="pt-2 border-t border-[#F5C2BF]/50 space-y-2">
+                  <p className="text-[11px] text-[#786866] leading-relaxed">
+                    💡 <strong>Tip:</strong> Supabase confirmation emails often land in your <strong>Spam / Junk</strong> folder (sender: <code>noreply@mail.app.supabase.io</code>).
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleResendVerification}
+                    disabled={resending}
+                    className="px-3 py-1.5 rounded-xl bg-[#9C5550] text-[#FFFDFC] text-xs font-semibold hover:bg-[#8A4743] transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                  >
+                    <Send className="w-3 h-3" />
+                    <span>{resending ? 'Sending...' : 'Resend Verification Email'}</span>
+                  </button>
+                </div>
               )}
-            </button>
-          </form>
-        ) : (
-          /* ===================================================================
-             2. CUSTOMER LOGIN FORM (Standard browser password manager autofill)
-             =================================================================== */
+            </div>
+          )}
+
+          {/* Customer Login Form */}
           <form onSubmit={handleSubmit} autoComplete="on" className="space-y-4">
             <div>
               <label htmlFor="login-email" className="block text-xs font-semibold text-[#313851] uppercase tracking-wider mb-1.5">
@@ -345,17 +232,15 @@ export default function Login() {
               )}
             </button>
           </form>
-        )}
 
-        {/* Signup Redirect - Only shown for customer portal */}
-        {!isAdminLogin && (
-          <div className="text-center text-xs text-[#786866]">
+          {/* Account creation link */}
+          <div className="pt-2 text-center text-xs text-[#786866]">
             Don't have an account yet?{' '}
             <Link to="/signup" className="text-[#9C5550] font-semibold hover:underline">
               Create an account
             </Link>
           </div>
-        )}
+        </div>
 
       </div>
     </div>

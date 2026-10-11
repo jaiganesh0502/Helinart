@@ -51,9 +51,9 @@ export default function AdminRoute({ children }) {
     );
   }
 
-  // Not logged in -> Redirect to login with redirect path
+  // Not logged in -> Redirect to admin login with redirect path
   if (!user) {
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+    return <Navigate to="/admin/login" state={{ from: location.pathname }} replace />;
   }
 
   // EXACT ADMIN ACCESS RULE:
