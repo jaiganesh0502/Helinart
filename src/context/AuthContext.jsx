@@ -61,7 +61,8 @@ export function AuthProvider({ children }) {
       setUser(current);
       return { success: true, user: current };
     } catch (err) {
-      return { success: false, error: err.message };
+      const isUnconfirmed = err.message?.toLowerCase().includes('verify your email');
+      return { success: false, error: err.message, needsEmailConfirmation: isUnconfirmed };
     } finally {
       setLoading(false);
     }
@@ -72,12 +73,43 @@ export function AuthProvider({ children }) {
     try {
       const res = await authService.signUp({ email, password, fullName, phone });
       const current = await authService.getCurrentUser();
-      setUser(current);
-      return { success: true, user: current };
+      if (current) setUser(current);
+      return { 
+        success: true, 
+        user: current || res.user, 
+        needsEmailConfirmation: res.needsEmailConfirmation 
+      };
     } catch (err) {
       return { success: false, error: err.message };
     } finally {
       setLoading(false);
+    }
+  };
+
+  const resendVerificationEmail = async (email) => {
+    try {
+      await authService.resendVerificationEmail(email);
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const resetPassword = async (email) => {
+    try {
+      await authService.resetPassword(email);
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const updatePassword = async (newPassword) => {
+    try {
+      await authService.updatePassword(newPassword);
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
     }
   };
 
@@ -135,7 +167,10 @@ export function AuthProvider({ children }) {
     signIn,
     signUp,
     signOut,
-    updateProfile
+    updateProfile,
+    resendVerificationEmail,
+    resetPassword,
+    updatePassword
   };
 
   return (

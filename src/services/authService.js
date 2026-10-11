@@ -3,6 +3,51 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase.js';
 const LOCAL_USERS_KEY = 'helinart_local_auth_users_v1';
 const CURRENT_SESSION_KEY = 'helinart_local_current_session_v1';
 
+// Standardized error mapper adhering strictly to specifications
+function mapAuthError(err, context = 'login') {
+  if (!err) return null;
+  const msg = (err.message || '').toLowerCase();
+  const status = err.status || 0;
+  const code = (err.code || '').toLowerCase();
+
+  // Network or connectivity issue
+  if (msg.includes('fetch') || msg.includes('network') || msg.includes('failed to fetch')) {
+    return "We couldn't connect. Please try again.";
+  }
+
+  // Unconfirmed / pending email verification
+  if (msg.includes('email not confirmed') || code.includes('email_not_confirmed')) {
+    return "Please verify your email before signing in.";
+  }
+
+  // Account already exists
+  if (
+    msg.includes('already registered') ||
+    msg.includes('already exists') ||
+    code.includes('user_already_exists') ||
+    (context === 'signup' && (status === 422 || (status === 400 && msg.includes('registered'))))
+  ) {
+    return "An account already exists with this email. Please sign in.";
+  }
+
+  // Wrong password or email
+  if (
+    msg.includes('invalid login credentials') ||
+    msg.includes('invalid credentials') ||
+    msg.includes('invalid email or password') ||
+    code.includes('invalid_credentials')
+  ) {
+    return "Invalid email or password.";
+  }
+
+  // Rate limit
+  if (msg.includes('rate limit')) {
+    return "Too many sign in/up attempts. Please wait a moment and try again.";
+  }
+
+  return err.message || "An authentication error occurred. Please try again.";
+}
+
 // Fallback storage for local demonstration without credentials
 function getLocalUsers() {
   const stored = localStorage.getItem(LOCAL_USERS_KEY);
@@ -26,82 +71,163 @@ function getLocalUsers() {
 export const authService = {
   /**
    * Customer Signup
-   * CRITICAL SECURITY RULE: Public signup ALWAYS assigns role = 'customer'
+   * Open to any visitor with any valid email address.
+   * Every public signup strictly receives role = 'customer'.
    */
   async signUp({ email, password, fullName, phone }) {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanName = fullName.trim();
+    const cleanPhone = (phone || '').trim();
+
     if (isSupabaseConfigured) {
       const { data, error } = await supabase.auth.signUp({
-        email: email.trim(),
+        email: cleanEmail,
         password,
         options: {
           data: {
-            full_name: fullName.trim(),
-            phone: (phone || '').trim(),
-            role: 'customer' // Enforced
+            full_name: cleanName,
+            phone: cleanPhone || null,
+            role: 'customer' // Enforced metadata; public users NEVER receive admin
           }
         }
       });
-      if (error) throw error;
-      
-      // Upsert profile record explicitly to guarantee immediate availability
-      if (data.user) {
-        await supabase.from('profiles').upsert({
-          id: data.user.id,
-          email: data.user.email,
-          full_name: fullName.trim(),
-          phone: (phone || '').trim(),
-          role: 'customer' // NEVER allow admin on signup
-        });
+
+      if (error) {
+        throw new Error(mapAuthError(error, 'signup'));
       }
-      return data;
+
+      // Check if user already exists (Supabase returns empty identities array when email confirmation is active)
+      if (data?.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+        throw new Error("An account already exists with this email. Please sign in.");
+      }
+
+      const needsEmailConfirmation = Boolean(data?.user && !data?.session);
+
+      // If immediate session is granted, sync to public.profiles
+      if (data?.session && data?.user) {
+        supabase
+          .from('profiles')
+          .upsert({
+            id: data.user.id,
+            email: cleanEmail,
+            full_name: cleanName,
+            phone: cleanPhone,
+            role: 'customer'
+          })
+          .catch(() => {});
+      }
+
+      return {
+        user: data.user,
+        session: data.session,
+        needsEmailConfirmation
+      };
     }
 
     // Local Fallback
     const users = getLocalUsers();
-    if (users.some(u => u.email.toLowerCase() === email.trim().toLowerCase())) {
-      throw new Error('An account with this email already exists.');
+    if (users.some(u => u.email.toLowerCase() === cleanEmail)) {
+      throw new Error("An account already exists with this email. Please sign in.");
     }
     const newUser = {
       id: 'usr-' + Date.now(),
-      email: email.trim().toLowerCase(),
+      email: cleanEmail,
       password,
       role: 'customer', // Forced
-      full_name: fullName.trim(),
-      phone: (phone || '').trim(),
+      full_name: cleanName,
+      phone: cleanPhone,
       created_at: new Date().toISOString()
     };
     users.push(newUser);
     localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(users));
     localStorage.setItem(CURRENT_SESSION_KEY, JSON.stringify(newUser));
-    return { user: newUser, session: { user: newUser } };
+    return { user: newUser, session: { user: newUser }, needsEmailConfirmation: false };
   },
 
   /**
    * Login
+   * Any registered customer can log in using email and password.
    */
   async signIn({ email, password }) {
+    const cleanEmail = email.trim().toLowerCase();
+
     if (isSupabaseConfigured) {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
+        email: cleanEmail,
         password
       });
-      if (error) throw error;
+
+      if (error) {
+        throw new Error(mapAuthError(error, 'login'));
+      }
+
       return data;
     }
 
     // Local Fallback
     const users = getLocalUsers();
     const user = users.find(
-      u => u.email.toLowerCase() === email.trim().toLowerCase() && u.password === password
+      u => u.email.toLowerCase() === cleanEmail && u.password === password
     );
     if (!user) {
-      throw new Error('Invalid email or password.');
+      throw new Error("Invalid email or password.");
     }
     if (user.email.toLowerCase() === 'helina.nailart@gmail.com') {
       user.role = 'admin';
     }
     localStorage.setItem(CURRENT_SESSION_KEY, JSON.stringify(user));
     return { user, session: { user } };
+  },
+
+  /**
+   * Resend Verification Email
+   */
+  async resendVerificationEmail(email) {
+    const cleanEmail = email.trim().toLowerCase();
+    if (isSupabaseConfigured) {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: cleanEmail
+      });
+      if (error) {
+        throw new Error(mapAuthError(error, 'resend'));
+      }
+      return true;
+    }
+    return true;
+  },
+
+  /**
+   * Send Password Reset Link
+   */
+  async resetPassword(email) {
+    const cleanEmail = email.trim().toLowerCase();
+    if (isSupabaseConfigured) {
+      const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
+        redirectTo: `${window.location.origin}/reset-password`
+      });
+      if (error) {
+        throw new Error(mapAuthError(error, 'reset'));
+      }
+      return true;
+    }
+    return true;
+  },
+
+  /**
+   * Update Password (After clicking reset link)
+   */
+  async updatePassword(newPassword) {
+    if (isSupabaseConfigured) {
+      const { data, error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+      if (error) {
+        throw new Error(mapAuthError(error, 'update_password'));
+      }
+      return data;
+    }
+    return true;
   },
 
   /**

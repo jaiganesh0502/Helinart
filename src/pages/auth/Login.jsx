@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth, ADMIN_EMAIL } from '../../context/AuthContext';
-import { Lock, Mail, ArrowRight, ShieldCheck, Sparkles, AlertCircle } from 'lucide-react';
+import { Lock, Mail, ArrowRight, ShieldCheck, AlertCircle, Send, CheckCircle2 } from 'lucide-react';
 import SEO from '../../components/SEO';
 
 export default function Login() {
-  const { signIn, user } = useAuth();
+  const { signIn, resendVerificationEmail, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -13,6 +13,8 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
 
   const isAdminLogin = location.pathname === '/admin/login' || location.state?.from?.startsWith('/admin');
   const from = location.state?.from || (user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? '/admin/dashboard' : '/profile');
@@ -24,6 +26,8 @@ export default function Login() {
         navigate('/admin/dashboard', { replace: true });
       } else if (from && !from.startsWith('/admin')) {
         navigate(from, { replace: true });
+      } else {
+        navigate('/', { replace: true });
       }
     }
   }, [user, navigate, from]);
@@ -31,6 +35,7 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setResendSuccess(false);
     setSubmitting(true);
 
     const res = await signIn(email, password);
@@ -45,11 +50,28 @@ export default function Login() {
         navigate('/admin/dashboard', { replace: true });
       } else {
         // Normal customer account
-        const target = (from && !from.startsWith('/admin')) ? from : '/profile';
+        const target = (from && !from.startsWith('/admin')) ? from : '/';
         navigate(target, { replace: true });
       }
     } else {
       setError(res.error || 'Invalid email or password.');
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!email) {
+      setError('Please enter your email address above to resend verification.');
+      return;
+    }
+    setResending(true);
+    setResendSuccess(false);
+    const res = await resendVerificationEmail(email);
+    setResending(false);
+    if (res.success) {
+      setResendSuccess(true);
+      setTimeout(() => setResendSuccess(false), 5000);
+    } else {
+      setError(res.error || 'Failed to resend verification email.');
     }
   };
 
@@ -73,7 +95,7 @@ export default function Login() {
           <p className="text-xs text-[#786866]">
             {isAdminLogin 
               ? 'Enter authorized administrator credentials to access the Atelier portal' 
-              : 'Enter your credentials to access your Nailsbyhelina atelier account'}
+              : 'Enter your email address and password to sign in'}
           </p>
         </div>
 
@@ -108,10 +130,32 @@ export default function Login() {
           </button>
         </div>
 
+        {resendSuccess && (
+          <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>Verification email resent! Please check your inbox.</span>
+          </div>
+        )}
+
         {error && (
-          <div className="p-3.5 rounded-2xl bg-[#FDF2F1] border border-[#F5C2BF] text-xs text-[#9C5550] flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>{error}</span>
+          <div className="p-3.5 rounded-2xl bg-[#FDF2F1] border border-[#F5C2BF] text-xs text-[#9C5550] space-y-2">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{error}</span>
+            </div>
+            {error.includes('verify your email') && (
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={handleResendVerification}
+                  disabled={resending}
+                  className="px-3 py-1.5 rounded-xl bg-[#9C5550] text-[#FFFDFC] text-xs font-semibold hover:bg-[#8A4743] transition-colors flex items-center gap-1.5"
+                >
+                  <Send className="w-3 h-3" />
+                  <span>{resending ? 'Sending...' : 'Resend Verification Email'}</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -135,9 +179,19 @@ export default function Login() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#313851] uppercase tracking-wider mb-1.5">
-              Password
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-semibold text-[#313851] uppercase tracking-wider">
+                Password
+              </label>
+              {!isAdminLogin && (
+                <Link
+                  to="/forgot-password"
+                  className="text-xs text-[#9C5550] font-semibold hover:underline"
+                >
+                  Forgot Password?
+                </Link>
+              )}
+            </div>
             <div className="relative">
               <Lock className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
