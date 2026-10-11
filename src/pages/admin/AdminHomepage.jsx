@@ -25,39 +25,55 @@ export default function AdminHomepage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
+  const [toast, setToast] = useState(null); // { type: 'success' | 'error', message: string, details?: string }
   const [previewMode, setPreviewMode] = useState(false);
+
+  const showSuccessToast = (message) => {
+    setToast({ type: 'success', message });
+    setTimeout(() => setToast(null), 4500);
+  };
+
+  const showErrorToast = (message, details = '') => {
+    setToast({ type: 'error', message, details });
+    setTimeout(() => setToast(null), 6500);
+  };
+
+  const loadContentAndSettings = async () => {
+    try {
+      const [draft, settings] = await Promise.all([
+        contentService.getDraftContent(),
+        settingsService.getSettings()
+      ]);
+      setContent({
+        hero_eyebrow: draft?.hero_eyebrow || '',
+        hero_heading: draft?.hero_heading || '',
+        hero_highlight: draft?.hero_highlight || '',
+        hero_description: draft?.hero_description || '',
+        primary_cta_text: draft?.primary_cta_text || '',
+        secondary_cta_text: draft?.secondary_cta_text || '',
+        collection_heading: draft?.collection_heading || '',
+        collection_description: draft?.collection_description || '',
+        announcement_text: draft?.announcement_text || settings?.announcement_text || '',
+        footer_text: draft?.footer_text || '',
+        // Social settings strictly from site_settings (single source of truth):
+        instagram_handle: settings?.instagram_handle || '@nails.by.helina',
+        whatsapp_number: settings?.whatsapp_number || '+91 93614 05676'
+      });
+    } catch (err) {
+      console.error('Failed to load homepage CMS data', err);
+      showErrorToast('Unable to load homepage data. Please refresh.');
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
-    async function load() {
-      try {
-        const [draft, settings] = await Promise.all([
-          contentService.getDraftContent(),
-          settingsService.getSettings()
-        ]);
-        if (mounted) {
-          setContent({
-            ...draft,
-            announcement_text: draft?.announcement_text || settings?.announcement_text || '',
-            instagram_handle: draft?.instagram_handle || settings?.instagram_handle || '@nails.by.helina',
-            whatsapp_number: draft?.whatsapp_number || settings?.whatsapp_number || '+91 93614 05676'
-          });
-        }
-      } catch (err) {
-        console.error('Failed to load homepage draft', err);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    }
-    load();
+    (async () => {
+      setLoading(true);
+      await loadContentAndSettings();
+      if (mounted) setLoading(false);
+    })();
     return () => { mounted = false; };
   }, []);
-
-  const showToast = (msg) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(''), 3500);
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -68,24 +84,45 @@ export default function AdminHomepage() {
     if (e) e.preventDefault();
     setSaving(true);
     try {
-      await contentService.saveDraft(content);
-      if (content.announcement_text || content.instagram_handle || content.whatsapp_number) {
-        await settingsService.updateSettings({
-          announcement_text: content.announcement_text,
-          instagram_handle: content.instagram_handle,
-          whatsapp_number: content.whatsapp_number
-        }).catch(() => {});
-      }
+      // 1. Explicit homepage payload containing ONLY valid homepage_content columns
+      const homepagePayload = {
+        hero_eyebrow: content.hero_eyebrow,
+        hero_heading: content.hero_heading,
+        hero_highlight: content.hero_highlight,
+        hero_description: content.hero_description,
+        primary_cta_text: content.primary_cta_text,
+        secondary_cta_text: content.secondary_cta_text,
+        collection_heading: content.collection_heading,
+        collection_description: content.collection_description,
+        announcement_text: content.announcement_text,
+        footer_text: content.footer_text
+      };
+      await contentService.saveDraft(homepagePayload);
+
+      // 2. Explicit site_settings payload for social & helpline
+      const settingsPayload = {
+        instagram_handle: content.instagram_handle,
+        whatsapp_number: content.whatsapp_number,
+        announcement_text: content.announcement_text
+      };
+      await settingsService.updateSettings(settingsPayload);
+
+      // 3. Audit log
       await auditService.logAction({
         action: 'HOMEPAGE_DRAFT_SAVED',
         entityType: 'homepage',
         entityId: 'current_draft',
         details: { heading: content.hero_heading },
         adminUser: user
-      });
-      showToast('Draft changes saved successfully! (Not yet live on customer site)');
+      }).catch(() => {});
+
+      // 4. Refetch both datasets
+      await loadContentAndSettings();
+
+      showSuccessToast('Draft changes saved successfully. (Not yet live on customer site)');
     } catch (err) {
-      alert('Error saving draft: ' + err.message);
+      console.error('Failed to save draft:', err);
+      showErrorToast('Unable to save draft. Please try again.', err.message);
     } finally {
       setSaving(false);
     }
@@ -95,26 +132,61 @@ export default function AdminHomepage() {
     if (!window.confirm('Are you sure you want to publish these changes directly to the live customer website?')) {
       return;
     }
+
     setPublishing(true);
     try {
-      await contentService.publishContent(content);
-      if (content.announcement_text || content.instagram_handle || content.whatsapp_number) {
-        await settingsService.updateSettings({
-          announcement_text: content.announcement_text,
-          instagram_handle: content.instagram_handle,
-          whatsapp_number: content.whatsapp_number
-        }).catch(() => {});
+      // STEP 1: Save/publish homepage content to homepage_content
+      const homepagePayload = {
+        hero_eyebrow: content.hero_eyebrow,
+        hero_heading: content.hero_heading,
+        hero_highlight: content.hero_highlight,
+        hero_description: content.hero_description,
+        primary_cta_text: content.primary_cta_text,
+        secondary_cta_text: content.secondary_cta_text,
+        collection_heading: content.collection_heading,
+        collection_description: content.collection_description,
+        announcement_text: content.announcement_text,
+        footer_text: content.footer_text
+      };
+
+      try {
+        await contentService.publishContent(homepagePayload);
+      } catch (hpError) {
+        console.error('Homepage content publish failed:', hpError);
+        throw new Error(`Homepage publish failed: ${hpError.message || 'Database error'}`);
       }
+
+      // STEP 2: Save social settings to site_settings
+      const settingsPayload = {
+        instagram_handle: content.instagram_handle,
+        whatsapp_number: content.whatsapp_number,
+        announcement_text: content.announcement_text
+      };
+
+      try {
+        await settingsService.updateSettings(settingsPayload);
+      } catch (settError) {
+        console.error('Support & social settings update failed:', settError);
+        throw new Error(`Support settings update failed: ${settError.message || 'Database error'}`);
+      }
+
+      // STEP 3: Audit log
       await auditService.logAction({
         action: 'HOMEPAGE_PUBLISHED',
         entityType: 'homepage',
         entityId: 'current',
         details: { heading: content.hero_heading, highlight: content.hero_highlight },
         adminUser: user
-      });
-      showToast('🚀 Homepage published live to customer store!');
+      }).catch(() => {});
+
+      // STEP 4: Refetch both datasets to sync state
+      await loadContentAndSettings();
+
+      // STEP 5: Success Toast
+      showSuccessToast('Homepage published successfully.');
     } catch (err) {
-      alert('Error publishing content: ' + err.message);
+      console.error('Publish error:', err);
+      showErrorToast('Unable to publish homepage. Please try again.', err.message);
     } finally {
       setPublishing(false);
     }
@@ -124,10 +196,33 @@ export default function AdminHomepage() {
     <AdminLayout title="Homepage Content Management (CMS)">
       <div className="max-w-4xl mx-auto space-y-6">
         
-        {toastMessage && (
-          <div className="p-3.5 rounded-2xl bg-[#EEF3EE] border border-[#B7DCB2] text-xs font-semibold text-[#43623E] flex items-center gap-2 shadow-xs">
-            <CheckCircle className="w-4 h-4 shrink-0" />
-            <span>{toastMessage}</span>
+        {toast && (
+          <div 
+            className={`p-3.5 rounded-2xl border text-xs font-semibold flex items-center justify-between gap-3 shadow-xs animate-in fade-in duration-200 ${
+              toast.type === 'success'
+                ? 'bg-[#EEF3EE] border-[#B7DCB2] text-[#43623E]'
+                : 'bg-[#FDF2F2] border-[#E8B4B4] text-[#9C5550]'
+            }`}
+            role="status"
+          >
+            <div className="flex items-center gap-2">
+              {toast.type === 'success' ? (
+                <CheckCircle className="w-4 h-4 shrink-0 text-[#43623E]" />
+              ) : (
+                <AlertCircle className="w-4 h-4 shrink-0 text-[#9C5550]" />
+              )}
+              <span>{toast.message}</span>
+              {toast.details && (
+                <span className="text-[11px] opacity-80 font-normal">({toast.details})</span>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => setToast(null)}
+              className="text-current opacity-60 hover:opacity-100 text-xs font-bold"
+            >
+              ✕
+            </button>
           </div>
         )}
 

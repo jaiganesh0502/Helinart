@@ -15,11 +15,52 @@ const defaultContent = {
   collection_heading: 'Curated Nail Collections',
   collection_description: 'Handcrafted press-on sets designed with precision gel artistry and long-lasting durability.',
   announcement_text: 'Complimentary express pan-India delivery on orders over ₹999 ✨',
-  instagram_handle: '@nails.by.helina',
-  whatsapp_number: '+91 93614 05676',
   footer_text: 'Haute couture press-on nails sculpted with salon-grade precision and delivered across India.',
   updated_at: new Date().toISOString()
 };
+
+/**
+ * Strict column whitelist matching production public.homepage_content schema.
+ * Social/support fields (instagram_handle, whatsapp_number, etc.) belong strictly in site_settings.
+ */
+const VALID_HOMEPAGE_COLUMNS = [
+  'hero_eyebrow',
+  'hero_heading',
+  'hero_highlight',
+  'hero_description',
+  'primary_cta_text',
+  'secondary_cta_text',
+  'collection_heading',
+  'collection_description',
+  'announcement_text',
+  'footer_text'
+];
+
+/**
+ * Builds an explicit, sanitized payload for the homepage_content table.
+ */
+function buildHomepagePayload(input = {}, status = 'published') {
+  const isDraft = status === 'draft';
+  const now = new Date().toISOString();
+
+  const payload = {
+    id: isDraft ? 'current_draft' : 'current',
+    status: isDraft ? 'draft' : 'published',
+    updated_at: now
+  };
+
+  if (!isDraft) {
+    payload.published_at = now;
+  }
+
+  for (const col of VALID_HOMEPAGE_COLUMNS) {
+    if (input[col] !== undefined) {
+      payload[col] = input[col];
+    }
+  }
+
+  return payload;
+}
 
 export const contentService = {
   /**
@@ -69,42 +110,61 @@ export const contentService = {
   },
 
   /**
-   * Admin: Save Draft
+   * Admin: Save Draft (Strictly sends verified homepage_content columns)
    */
   async saveDraft(content) {
-    const record = {
-      ...content,
-      id: 'current_draft',
-      status: 'draft',
-      updated_at: new Date().toISOString()
-    };
+    const record = buildHomepagePayload(content, 'draft');
 
     if (isSupabaseConfigured) {
-      await supabase.from('homepage_content').upsert(record);
+      const { data, error } = await supabase
+        .from('homepage_content')
+        .upsert(record)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Supabase homepage_content saveDraft error:', error);
+        throw error;
+      }
+      localStorage.setItem(LOCAL_HOMEPAGE_DRAFT_KEY, JSON.stringify(data || record));
+      return data || record;
     }
+
     localStorage.setItem(LOCAL_HOMEPAGE_DRAFT_KEY, JSON.stringify(record));
     return record;
   },
 
   /**
-   * Admin: Publish Live
+   * Admin: Publish Live (Strictly sends verified homepage_content columns)
    */
   async publishContent(content) {
-    const record = {
-      ...content,
-      id: 'current',
-      status: 'published',
-      published_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
+    const record = buildHomepagePayload(content, 'published');
 
     if (isSupabaseConfigured) {
-      const { error } = await supabase.from('homepage_content').upsert(record);
-      if (error) throw error;
+      const { data, error } = await supabase
+        .from('homepage_content')
+        .upsert(record)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Supabase homepage_content publish error:', error);
+        throw error;
+      }
+
+      localStorage.setItem(LOCAL_HOMEPAGE_PUBLISHED_KEY, JSON.stringify(data || record));
+      localStorage.setItem(
+        LOCAL_HOMEPAGE_DRAFT_KEY, 
+        JSON.stringify({ ...(data || record), id: 'current_draft', status: 'draft' })
+      );
+      return data || record;
     }
 
     localStorage.setItem(LOCAL_HOMEPAGE_PUBLISHED_KEY, JSON.stringify(record));
-    localStorage.setItem(LOCAL_HOMEPAGE_DRAFT_KEY, JSON.stringify({ ...record, id: 'current_draft', status: 'draft' }));
+    localStorage.setItem(
+      LOCAL_HOMEPAGE_DRAFT_KEY, 
+      JSON.stringify({ ...record, id: 'current_draft', status: 'draft' })
+    );
     return record;
   }
 };

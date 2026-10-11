@@ -28,6 +28,22 @@ const defaultStudioSettings = {
   deposit_amount: 200
 };
 
+/**
+ * Strict column whitelist matching production public.site_settings schema.
+ */
+const VALID_SITE_SETTINGS_COLUMNS = [
+  'brand_name',
+  'instagram_url',
+  'instagram_handle',
+  'whatsapp_number',
+  'whatsapp_raw_number',
+  'support_email',
+  'announcement_text',
+  'free_shipping_threshold',
+  'currency',
+  'studio_booking_enabled'
+];
+
 export const settingsService = {
   /**
    * Get Site Settings (Social, Brand, Shipping, Studio Flag)
@@ -52,26 +68,44 @@ export const settingsService = {
   },
 
   /**
-   * Update Site Settings
+   * Update Site Settings (Strictly sends verified site_settings columns)
    */
-  async updateSettings(updates) {
-    const newSettings = {
-      ...updates,
+  async updateSettings(updates = {}) {
+    const sanitized = {
       id: 'global',
       updated_at: new Date().toISOString()
     };
 
+    for (const col of VALID_SITE_SETTINGS_COLUMNS) {
+      if (updates[col] !== undefined) {
+        sanitized[col] = updates[col];
+      }
+    }
+
+    // Auto-sync clean digits for wa.me links
+    if (sanitized.whatsapp_number && !sanitized.whatsapp_raw_number) {
+      sanitized.whatsapp_raw_number = sanitized.whatsapp_number.replace(/\D/g, '');
+    }
+
+    // Auto-sync instagram_url if handle is updated
+    if (sanitized.instagram_handle && !sanitized.instagram_url) {
+      const cleanHandle = sanitized.instagram_handle.replace(/^@/, '').trim();
+      if (cleanHandle) {
+        sanitized.instagram_url = `https://www.instagram.com/${cleanHandle}/`;
+      }
+    }
+
     if (isSupabaseConfigured) {
       let { data, error } = await supabase
         .from('site_settings')
-        .upsert(newSettings)
+        .upsert(sanitized)
         .select()
         .single();
 
       if (error) {
         const updateRes = await supabase
           .from('site_settings')
-          .update(newSettings)
+          .update(sanitized)
           .eq('id', 'global')
           .select()
           .single();
@@ -86,16 +120,15 @@ export const settingsService = {
         throw error;
       }
       try {
-        localStorage.setItem(LOCAL_SETTINGS_KEY, JSON.stringify(data || newSettings));
+        localStorage.setItem(LOCAL_SETTINGS_KEY, JSON.stringify(data || sanitized));
       } catch (e) {}
-      return data || newSettings;
+      return data || sanitized;
     }
 
     const current = await this.getSettings();
-    const merged = { ...current, ...newSettings };
+    const merged = { ...current, ...sanitized };
     localStorage.setItem(LOCAL_SETTINGS_KEY, JSON.stringify(merged));
     return merged;
-
   },
 
   /**
