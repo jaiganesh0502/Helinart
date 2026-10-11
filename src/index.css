@@ -429,36 +429,270 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* =========================================================================
-   LUXURY EMPTY CART WATERMARK & SPARKLE ANIMATIONS
+   LUXURY EMPTY CART WATERMARK, MICRO-ANIMATIONS & PREMIUM INTERACTIONS
    ========================================================================= */
-@keyframes cartLogoFloat {
+
+/* 1. Page Entrance Stagger */
+@keyframes cartFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cart-animate-entrance {
+  animation: cartFadeUp 600ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+/* 2. Heading & Label Entrance Details */
+@keyframes cartHeadingEntrance {
+  0% {
+    opacity: 0;
+    letter-spacing: 0.02em;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    letter-spacing: normal;
+    transform: translateY(0);
+  }
+}
+
+.cart-heading-entrance {
+  animation: cartHeadingEntrance 500ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+@keyframes cartLabelEntrance {
+  0% {
+    opacity: 0;
+    letter-spacing: 0.18em;
+  }
+  100% {
+    opacity: 1;
+    letter-spacing: 0.24em;
+  }
+}
+
+.cart-label-entrance {
+  animation: cartLabelEntrance 550ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+/* 3. Shopping Bag Logo Floating & Frame Hover */
+@keyframes bagFloat {
   0%, 100% {
-    transform: translateY(0px) scale(1);
+    transform: translateY(0);
   }
   50% {
-    transform: translateY(-10px) scale(1.01);
+    transform: translateY(-6px);
   }
 }
 
-.cart-watermark-float {
-  animation: cartLogoFloat 7s ease-in-out infinite;
+.cart-bag-float {
+  animation: bagFloat 4.5s ease-in-out infinite;
 }
 
-@keyframes sparklePulseSlow {
+.cart-bag-frame {
+  transition: transform 250ms ease, box-shadow 250ms ease, border-color 250ms ease;
+}
+
+.cart-bag-frame:hover {
+  transform: translateY(-4px) scale(1.025);
+  box-shadow: 0 12px 28px rgba(49, 56, 81, 0.10);
+  border-color: rgba(201, 143, 138, 0.45);
+}
+
+/* 4. Large Background Watermark Drift (Scale & Rotation 16-20s) */
+@keyframes cartWatermarkDrift {
   0%, 100% {
-    opacity: 0.3;
-    transform: scale(0.85);
+    transform: scale(1) rotate(-1deg);
   }
   50% {
-    opacity: 0.85;
-    transform: scale(1.15);
+    transform: scale(1.02) rotate(1deg);
   }
 }
 
-.sparkle-pulse-slow {
-  animation: sparklePulseSlow 4.5s ease-in-out infinite;
+.cart-watermark-drift {
+  animation: cartWatermarkDrift 18s ease-in-out infinite;
 }
 
+/* 5. Ambient Background Glow Drift */
+@keyframes cartAmbientGlow {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(14px, -10px) scale(1.03);
+  }
+}
+
+.cart-ambient-glow {
+  animation: cartAmbientGlow 14s ease-in-out infinite;
+}
+
+/* 6. Sparkle Pulses */
+@keyframes cartSparklePulse {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(0.75);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.1);
+  }
+}
+
+.cart-sparkle-1 { animation: cartSparklePulse 3.2s ease-in-out infinite 0s; }
+.cart-sparkle-2 { animation: cartSparklePulse 4.2s ease-in-out infinite 0.7s; }
+.cart-sparkle-3 { animation: cartSparklePulse 3.6s ease-in-out infinite 1.4s; }
+.cart-sparkle-4 { animation: cartSparklePulse 4.6s ease-in-out infinite 2.1s; }
+.cart-sparkle-5 { animation: cartSparklePulse 3.8s ease-in-out infinite 0.9s; }
+
+/* 7. Empty Cart Card Hover */
+.cart-luxury-card {
+  transition: box-shadow 300ms ease, transform 300ms ease;
+}
+
+.cart-luxury-card:hover {
+  box-shadow: 0 20px 50px rgba(49, 56, 81, 0.09) !important;
+  transform: scale(1.002);
+}
+
+/* 8. Primary CTA: Lift, Deepened Gradient, Arrow Slide, & Light Sweep */
+.cart-btn-primary {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #D39A94 0%, #C98F8A 55%, #B77F7B 100%);
+  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.cart-btn-primary::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -80%;
+  width: 45%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.22),
+    transparent
+  );
+  transform: skewX(-18deg);
+  transition: left 600ms ease;
+  pointer-events: none;
+}
+
+.cart-btn-primary:hover::before {
+  left: 130%;
+}
+
+.cart-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(183, 127, 123, 0.20);
+  background: linear-gradient(135deg, #C98F8A 0%, #B77F7B 55%, #A86F6B 100%);
+}
+
+.cart-btn-primary:active {
+  transform: translateY(0) scale(0.98);
+  transition-duration: 120ms;
+}
+
+.cart-btn-primary .cart-btn-arrow {
+  display: inline-block;
+  transition: transform 180ms ease;
+  transform: translateX(0);
+}
+
+.cart-btn-primary:hover .cart-btn-arrow {
+  transform: translateX(5px);
+}
+
+/* 9. Secondary CTA: Inversion, Hover Lift, & Active Feedback */
+.cart-btn-secondary {
+  background: rgba(255, 253, 252, 0.72);
+  border: 1px solid #D8C6C3;
+  color: #313851;
+  transition: transform 220ms ease, box-shadow 220ms ease, background 220ms ease, color 220ms ease, border-color 220ms ease;
+}
+
+.cart-btn-secondary:hover {
+  background: #313851;
+  color: #FFFDFC;
+  border-color: #313851;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(49, 56, 81, 0.10);
+}
+
+.cart-btn-secondary:active {
+  transform: translateY(0) scale(0.98);
+  transition-duration: 120ms;
+}
+
+/* 10. Lookbook Link: Animated Left-to-Right Underline & Arrow Slide */
+.cart-lookbook-link {
+  color: #A86F6B;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  transition: color 180ms ease;
+  text-decoration: none;
+}
+
+.cart-lookbook-link:hover {
+  color: #C98F8A;
+}
+
+.cart-lookbook-link::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0%;
+  height: 1px;
+  background-color: #C98F8A;
+  transition: width 220ms ease;
+}
+
+.cart-lookbook-link:hover::after {
+  width: 100%;
+}
+
+.cart-lookbook-link .cart-lookbook-arrow {
+  display: inline-block;
+  transition: transform 180ms ease;
+  transform: translateX(0);
+}
+
+.cart-lookbook-link:hover .cart-lookbook-arrow {
+  transform: translateX(4px);
+}
+
+/* 11. Category Filter Chips: Hover Lift & Tap Compression */
+.cart-category-chip {
+  background: rgba(255, 253, 252, 0.55);
+  border: 1px solid #D8C6C3;
+  color: #313851;
+  transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.cart-category-chip:hover {
+  background: #F4ECE6;
+  border-color: #C98F8A;
+  color: #A86F6B;
+  transform: translateY(-2px);
+}
+
+.cart-category-chip:active {
+  transform: scale(0.96);
+  transition-duration: 100ms;
+}
+
+/* 12. Accessibility: Reduced Motion Support */
 @media (prefers-reduced-motion: reduce) {
   .logo-reveal-anim,
   .logo-float-anim,
@@ -470,10 +704,36 @@ input:focus, select:focus, textarea:focus {
   .sparkle-anim-3,
   .sparkle-anim-4,
   .sparkle-anim-5,
-  .cart-watermark-float,
-  .sparkle-pulse-slow {
+  .cart-watermark-drift,
+  .cart-ambient-glow,
+  .cart-sparkle-1,
+  .cart-sparkle-2,
+  .cart-sparkle-3,
+  .cart-sparkle-4,
+  .cart-sparkle-5,
+  .cart-bag-float,
+  .cart-animate-entrance,
+  .cart-heading-entrance,
+  .cart-label-entrance {
     animation: none !important;
   }
+
+  .cart-btn-primary::before {
+    display: none !important;
+  }
+
+  .cart-btn-primary,
+  .cart-btn-secondary,
+  .cart-category-chip,
+  .cart-bag-frame,
+  .cart-luxury-card,
+  .cart-lookbook-link,
+  .cart-lookbook-arrow,
+  .cart-btn-arrow {
+    transition: none !important;
+    transform: none !important;
+  }
 }
+
 
 

@@ -83,19 +83,19 @@ export default function Cart() {
           className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden -z-10"
           aria-hidden="true"
         >
-          {/* Soft ambient champagne & rose radial glow */}
+          {/* Soft ambient champagne & rose radial glow with slow subtle drift */}
           <div 
-            className="absolute w-[500px] h-[500px] sm:w-[750px] sm:h-[750px] rounded-full blur-3xl opacity-70 pointer-events-none"
+            className="cart-ambient-glow absolute w-[520px] h-[520px] sm:w-[780px] sm:h-[780px] rounded-full blur-3xl opacity-75 pointer-events-none"
             style={{
-              background: 'radial-gradient(circle at 50% 50%, rgba(201, 143, 138, 0.09) 0%, rgba(200, 164, 106, 0.05) 40%, rgba(246, 243, 237, 0) 70%)'
+              background: 'radial-gradient(circle at 30% 30%, rgba(201, 143, 138, 0.08) 0%, transparent 35%), radial-gradient(circle at 70% 65%, rgba(200, 164, 106, 0.07) 0%, transparent 32%)'
             }}
           />
 
-          {/* Large delicate logo watermark with subtle floating animation */}
+          {/* Large delicate logo watermark with extremely slow ambient drift */}
           <img
             src="/helinart-logo.png"
             alt=""
-            className="cart-watermark-float w-72 h-72 sm:w-96 sm:h-96 md:w-[480px] md:h-[480px] object-contain opacity-[0.065] transform-gpu transition-opacity"
+            className="cart-watermark-drift w-72 h-72 sm:w-96 sm:h-96 md:w-[480px] md:h-[480px] object-contain opacity-[0.055] transform-gpu pointer-events-none select-none transition-opacity"
           />
         </div>
 
@@ -104,80 +104,116 @@ export default function Cart() {
             ----------------------------------------------------------------- */}
         <div className="relative max-w-xl mx-auto w-full my-auto z-10">
           
-          {/* Subtle Decorative Sparkles Around Card */}
-          <div className="absolute -top-4 -left-3 sm:-left-6 pointer-events-none select-none sparkle-pulse-slow text-[#C8A46A]" aria-hidden="true">
-            <Sparkles className="w-5 h-5 opacity-60" />
+          {/* Subtle Decorative Sparkles Around Card (Champagne Gold, Dusty Rose, Soft Blue Grey) */}
+          <div className="cart-sparkle-1 absolute -top-4 -left-3 sm:-left-6 pointer-events-none select-none text-[#C8A46A]" aria-hidden="true">
+            <Sparkles className="w-5 h-5 opacity-70" />
           </div>
-          <div className="absolute top-1/4 -right-2 sm:-right-6 pointer-events-none select-none sparkle-pulse-slow text-[#C98F8A]" style={{ animationDelay: '1.2s' }} aria-hidden="true">
-            <Sparkles className="w-4 h-4 opacity-50" />
+          <div className="cart-sparkle-2 absolute top-1/5 -right-2 sm:-right-6 pointer-events-none select-none text-[#C98F8A]" aria-hidden="true">
+            <Sparkles className="w-4 h-4 opacity-60" />
           </div>
-          <div className="absolute -bottom-3 left-10 pointer-events-none select-none sparkle-pulse-slow text-[#C2CBD3]" style={{ animationDelay: '2.4s' }} aria-hidden="true">
-            <Sparkles className="w-3.5 h-3.5 opacity-55" />
+          <div className="cart-sparkle-3 absolute top-1/2 -left-4 sm:-left-7 pointer-events-none select-none text-[#C2CBD3]" aria-hidden="true">
+            <Sparkles className="w-3.5 h-3.5 opacity-65" />
+          </div>
+          <div className="cart-sparkle-4 absolute -bottom-3 left-10 pointer-events-none select-none text-[#C8A46A]" aria-hidden="true">
+            <Sparkles className="w-4 h-4 opacity-55" />
+          </div>
+          <div className="cart-sparkle-5 absolute -bottom-4 right-8 sm:right-12 pointer-events-none select-none text-[#C98F8A]" aria-hidden="true">
+            <Sparkles className="w-3.5 h-3.5 opacity-60" />
           </div>
 
-          {/* Luxury Glass Card Container */}
+          {/* Luxury Glass Card Container with Gentle Hover Shadow */}
           <div 
-            className="rounded-[28px] p-8 sm:p-12 text-center space-y-6 sm:space-y-7 transition-all"
+            className="cart-luxury-card rounded-[28px] p-8 sm:p-12 text-center space-y-6 sm:space-y-7"
             style={{
               background: 'rgba(255, 253, 252, 0.82)',
               backdropFilter: 'blur(12px)',
               WebkitBackdropFilter: 'blur(12px)',
               border: '1px solid rgba(216, 198, 195, 0.55)',
-              boxShadow: '0 18px 40px rgba(49, 56, 81, 0.08)'
+              boxShadow: '0 14px 36px rgba(49, 56, 81, 0.06)'
             }}
           >
-            {/* Small Foreground Logo Container */}
-            <div className="w-20 h-20 mx-auto rounded-3xl bg-[#F4ECE6]/90 border border-[#D8C6C3]/80 flex items-center justify-center p-3.5 shadow-inner">
-              <img
-                src="/helinart-logo.png"
-                alt="Nailsbyhelina Atelier"
-                className="w-12 h-12 object-contain drop-shadow-2xs"
-              />
+            {/* 1. Stagger Entrance: Shopping Bag Logo Container with Subtle Floating & Frame Hover */}
+            <div className="cart-animate-entrance" style={{ animationDelay: '0ms' }}>
+              <div className="cart-bag-float">
+                <div 
+                  className="cart-bag-frame w-20 h-20 mx-auto rounded-3xl bg-[#F4ECE6]/90 border border-[#D8C6C3]/80 flex items-center justify-center p-3.5 shadow-xs cursor-pointer"
+                  title="Nailsbyhelina Atelier"
+                >
+                  <img
+                    src="/helinart-logo.png"
+                    alt="Nailsbyhelina Atelier"
+                    className="w-12 h-12 object-contain drop-shadow-2xs select-none"
+                  />
+                </div>
+              </div>
             </div>
 
-            {/* Typography Hierarchy */}
+            {/* Typography Hierarchy with Staggered Entrance */}
             <div className="space-y-3">
-              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.24em] text-[#B77F7B]">
+              {/* 2. Stagger Entrance: Small Label */}
+              <p 
+                className="cart-animate-entrance cart-label-entrance text-[11px] sm:text-xs font-semibold uppercase tracking-[0.24em] text-[#B77F7B]"
+                style={{ animationDelay: '80ms' }}
+              >
                 YOUR SHOPPING BAG
               </p>
-              <h1 className="font-heading font-medium text-3xl sm:text-4xl text-[#313851] tracking-tight leading-tight">
+
+              {/* 3. Stagger Entrance: Main Heading */}
+              <h1 
+                className="cart-animate-entrance cart-heading-entrance font-heading font-medium text-3xl sm:text-4xl text-[#313851] tracking-tight leading-tight"
+                style={{ animationDelay: '160ms' }}
+              >
                 Your cart is empty
               </h1>
-              <p className="text-sm sm:text-[15px] text-[#786866] leading-relaxed max-w-md mx-auto font-normal">
+
+              {/* 4. Stagger Entrance: Description Text */}
+              <p 
+                className="cart-animate-entrance text-sm sm:text-[15px] text-[#786866] leading-relaxed max-w-md mx-auto font-normal"
+                style={{ animationDelay: '240ms' }}
+              >
                 Looks like you haven’t added any nail sets yet. Explore handcrafted press-ons, couture finishes and signature looks made to elevate your style.
               </p>
             </div>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-1">
+            {/* 5. Stagger Entrance: CTA Buttons with Micro-Interactions */}
+            <div 
+              className="cart-animate-entrance flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-1"
+              style={{ animationDelay: '320ms' }}
+            >
               <Link
                 to="/shop"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-gradient-to-r from-[#B26661] via-[#9C5550] to-[#8A4743] text-[#FFFDFC] text-xs sm:text-sm font-semibold tracking-wider uppercase shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9C5550]"
+                className="cart-btn-primary w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-full text-[#FFFDFC] text-xs sm:text-sm font-semibold tracking-wider uppercase shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9C5550]"
               >
                 <span>Explore Nail Sets</span>
-                <ArrowRight className="w-4 h-4 text-[#FFFDFC]" />
+                <ArrowRight className="cart-btn-arrow w-4 h-4 text-[#FFFDFC]" />
               </Link>
               <Link
                 to="/shop?sort=bestseller"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-[#F6F3ED] text-[#313851] border border-[#D8C6C3] text-xs sm:text-sm font-semibold tracking-wider uppercase hover:bg-[#EFE9DF] hover:border-[#B77F7B]/50 hover:text-[#9C5550] transition-all shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9C5550]"
+                className="cart-btn-secondary w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9C5550]"
               >
                 <span>Shop Bestsellers</span>
               </Link>
             </div>
 
-            {/* Soft Link */}
-            <div className="pt-0.5">
+            {/* 6. Stagger Entrance: Lookbook Link with Animated Underline */}
+            <div 
+              className="cart-animate-entrance pt-0.5"
+              style={{ animationDelay: '400ms' }}
+            >
               <Link
                 to="/#lookbook"
-                className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-[#9C5550] hover:text-[#793D39] font-medium transition-colors underline-offset-4 hover:underline"
+                className="cart-lookbook-link text-xs sm:text-sm font-medium gap-1.5"
               >
                 <span>Need inspiration? Explore the Lookbook</span>
-                <ArrowRight className="w-3.5 h-3.5 text-[#9C5550]" />
+                <ArrowRight className="cart-lookbook-arrow w-3.5 h-3.5" />
               </Link>
             </div>
 
-            {/* Quick Action Chips */}
-            <div className="pt-4 border-t border-[#D8C6C3]/40 space-y-2.5">
+            {/* 7. Stagger Entrance: Quick Action Filter Chips with Hover Lift & Tap Feedback */}
+            <div 
+              className="cart-animate-entrance pt-4 border-t border-[#D8C6C3]/40 space-y-2.5"
+              style={{ animationDelay: '480ms' }}
+            >
               <span className="text-[11px] uppercase tracking-wider text-[#786866] font-medium block">
                 Popular Aesthetics
               </span>
@@ -192,7 +228,7 @@ export default function Cart() {
                   <Link
                     key={chip.label}
                     to={chip.to}
-                    className="px-3.5 py-1.5 rounded-full text-xs font-medium bg-[#FFFDFC]/90 border border-[#D8C6C3] text-[#313851] hover:bg-[#F6F3ED] hover:border-[#9C5550] hover:text-[#9C5550] transition-all shadow-2xs"
+                    className="cart-category-chip px-3.5 py-1.5 rounded-full text-xs font-medium shadow-2xs"
                   >
                     {chip.label}
                   </Link>
