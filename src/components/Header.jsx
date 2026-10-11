@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { Heart, ShoppingBag, Menu, X, User, Shield } from 'lucide-react';
 import { useStore } from '../store/useStore';
-import { FEATURES } from '../config/features';
 import { useAuth } from '../context/AuthContext';
 import { settingsService } from '../services/settingsService';
 
@@ -25,10 +24,6 @@ export default function Header({ dynamicSettings }) {
     }).catch(() => {});
     return () => { mounted = false; };
   }, [dynamicSettings]);
-
-  const studioBookingEnabled = siteSettings?.studio_booking_enabled !== undefined
-    ? Boolean(siteSettings.studio_booking_enabled)
-    : FEATURES.STUDIO_BOOKING_ENABLED;
 
   const announcementText = siteSettings?.announcement_text ||
     'Complimentary adhesive tab kit on orders above ₹999';
@@ -115,21 +110,6 @@ export default function Header({ dynamicSettings }) {
               RIGHT: Action items (Single Book Studio Slot CTA + Action Icons)
               ================================================================= */}
           <div className="flex items-center justify-end gap-3 sm:gap-4.5">
-            
-            {/* Single subtle premium booking CTA */}
-            <Link
-              to="/studio"
-              className="hidden lg:inline-flex items-center justify-center px-4.5 py-2.5 text-xs font-medium tracking-normal text-[#FFFDFC] transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-xs"
-              style={{
-                background: 'linear-gradient(135deg, #B26661 0%, #9C5550 55%, #8A4743 100%)',
-                borderRadius: '10px',
-                border: 'none',
-                color: '#FFFDFC'
-              }}
-            >
-              {studioBookingEnabled ? 'Book a studio slot' : 'Studio Opening Soon'}
-            </Link>
-
             {/* Favorites Icon Button with Live Count */}
             <Link
               to="/favorites"
@@ -242,18 +222,6 @@ export default function Header({ dynamicSettings }) {
                   Admin Portal Dashboard
                 </Link>
               )}
-
-              <Link
-                to="/studio"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-[#FFFDFC] shadow-xs"
-                style={{
-                  background: 'linear-gradient(135deg, #B26661 0%, #9C5550 55%, #8A4743 100%)',
-                  borderRadius: '10px'
-                }}
-              >
-                {studioBookingEnabled ? 'Book a studio slot' : 'Studio Opening Soon'}
-              </Link>
             </div>
           </div>
         )}
