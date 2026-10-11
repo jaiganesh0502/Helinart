@@ -91,14 +91,16 @@ export default function ResetPassword() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} autoComplete="on" className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-[#313851] uppercase tracking-wider mb-1.5">
+                <label htmlFor="reset-password" className="block text-xs font-semibold text-[#313851] uppercase tracking-wider mb-1.5">
                   NEW PASSWORD
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Lock className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
+                    id="reset-password"
+                    name="password"
                     type="password"
                     required
                     autoComplete="new-password"
@@ -111,12 +113,14 @@ export default function ResetPassword() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#313851] uppercase tracking-wider mb-1.5">
+                <label htmlFor="reset-confirm-password" className="block text-xs font-semibold text-[#313851] uppercase tracking-wider mb-1.5">
                   CONFIRM NEW PASSWORD
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Lock className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
+                    id="reset-confirm-password"
+                    name="confirm-password"
                     type="password"
                     required
                     autoComplete="new-password"

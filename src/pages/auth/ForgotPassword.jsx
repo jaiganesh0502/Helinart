@@ -81,14 +81,16 @@ export default function ForgotPassword() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} autoComplete="on" className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-[#313851] uppercase tracking-wider mb-1.5">
+                <label htmlFor="forgot-email" className="block text-xs font-semibold text-[#313851] uppercase tracking-wider mb-1.5">
                   EMAIL ADDRESS
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Mail className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
+                    id="forgot-email"
+                    name="email"
                     type="email"
                     required
                     autoComplete="email"

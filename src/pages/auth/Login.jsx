@@ -9,7 +9,6 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Strict: Always initialize to empty strings - never from storage or props
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -19,29 +18,12 @@ export default function Login() {
   const [resendSuccess, setResendSuccess] = useState(false);
   const [justVerified, setJustVerified] = useState(false);
 
-  // Clear form explicitly whenever /login mounts or path/tab changes
+  // Check URL hash for email verification redirects - DO NOT clear inputs on mount to respect browser autofill
   useEffect(() => {
-    setEmail('');
-    setPassword('');
-    setShowPassword(false);
-    setError('');
-
-    // Remove any legacy credential keys from storage
-    const credentialKeys = [
-      'email', 'loginEmail', 'rememberedEmail', 'userEmail',
-      'adminEmail', 'savedEmail', 'loginPassword', 'savedPassword', 'password'
-    ];
-    credentialKeys.forEach(k => {
-      try {
-        localStorage.removeItem(k);
-        sessionStorage.removeItem(k);
-      } catch (e) {}
-    });
-
     if (typeof window !== 'undefined' && (window.location.hash.includes('type=signup') || window.location.hash.includes('access_token'))) {
       setJustVerified(true);
     }
-  }, [location.pathname]);
+  }, []);
 
   const isAdminLogin = location.pathname === '/admin/login' || location.state?.from?.startsWith('/admin');
   const from = location.state?.from || (user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? '/admin/dashboard' : '/profile');
@@ -69,8 +51,7 @@ export default function Login() {
     setSubmitting(false);
 
     if (res.success) {
-      // Clear password from component memory immediately on success
-      setPassword('');
+      // Allow browser password manager to detect successful submission and prompt to save
       const isApprovedAdmin =
         res.user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
@@ -81,8 +62,6 @@ export default function Login() {
         navigate(target, { replace: true });
       }
     } else {
-      // Clear password on failure for security; keep email so user can fix a typo
-      setPassword('');
       setError(res.error || 'Invalid email or password.');
     }
   };
@@ -116,7 +95,7 @@ export default function Login() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <SEO 
-        title="Sign In | Nailsbyhelina Haute Couture Atelier"
+        title={isAdminLogin ? "Admin Sign In | Nailsbyhelina Atelier" : "Sign In | Nailsbyhelina Haute Couture Atelier"}
         description="Sign in to your Nailsbyhelina account to manage orders, favorites, and studio bookings."
       />
 
@@ -206,84 +185,161 @@ export default function Login() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-[#313851] uppercase tracking-wider mb-1.5">
-              EMAIL ADDRESS
-            </label>
-            <div className="relative">
-              <Mail className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <input
-                id="email"
-                type="email"
-                name="email"
-                required
-                autoComplete="username email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={isAdminLogin ? "Enter admin email" : "Enter your email address"}
-                className="w-full pl-10 pr-4 py-3 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:border-[#9C5550] focus:ring-1 focus:ring-[#9C5550] outline-none transition-all"
-              />
-            </div>
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold text-[#313851] uppercase tracking-wider">
-                PASSWORD
+        {isAdminLogin ? (
+          /* ===================================================================
+             3. ADMIN LOGIN FORM (Standard browser password manager autofill)
+             =================================================================== */
+          <form onSubmit={handleSubmit} autoComplete="on" className="space-y-4">
+            <div>
+              <label htmlFor="admin-email" className="block text-xs font-semibold text-[#313851] uppercase tracking-wider mb-1.5">
+                EMAIL ADDRESS
               </label>
-              {!isAdminLogin && (
+              <div className="relative">
+                <Mail className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  id="admin-email"
+                  name="username"
+                  type="email"
+                  required
+                  autoComplete="username"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter admin email"
+                  className="w-full pl-10 pr-4 py-3 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:border-[#9C5550] focus:ring-1 focus:ring-[#9C5550] outline-none transition-all"
+                />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label htmlFor="admin-password" className="block text-xs font-semibold text-[#313851] uppercase tracking-wider">
+                  PASSWORD
+                </label>
+              </div>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  id="admin-password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter password"
+                  className="w-full pl-10 pr-11 py-3 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:border-[#9C5550] focus:ring-1 focus:ring-[#9C5550] outline-none transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#786866] hover:text-[#313851] transition-colors p-1"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full py-3.5 rounded-full bg-gradient-to-r from-[#B26661] via-[#9C5550] to-[#8A4743] text-[#FFFDFC] text-sm font-semibold tracking-wide shadow-xs hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+            >
+              {submitting ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-[#FFFDFC] border-t-transparent rounded-full animate-spin" />
+                  Signing In...
+                </span>
+              ) : (
+                <>
+                  <span>Sign In to Admin Portal</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </form>
+        ) : (
+          /* ===================================================================
+             2. CUSTOMER LOGIN FORM (Standard browser password manager autofill)
+             =================================================================== */
+          <form onSubmit={handleSubmit} autoComplete="on" className="space-y-4">
+            <div>
+              <label htmlFor="customer-email" className="block text-xs font-semibold text-[#313851] uppercase tracking-wider mb-1.5">
+                EMAIL ADDRESS
+              </label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  id="customer-email"
+                  name="email"
+                  type="email"
+                  required
+                  autoComplete="username"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email address"
+                  className="w-full pl-10 pr-4 py-3 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:border-[#9C5550] focus:ring-1 focus:ring-[#9C5550] outline-none transition-all"
+                />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label htmlFor="customer-password" className="block text-xs font-semibold text-[#313851] uppercase tracking-wider">
+                  PASSWORD
+                </label>
                 <Link
                   to="/forgot-password"
                   className="text-xs text-[#9C5550] font-semibold hover:underline"
                 >
                   Forgot Password?
                 </Link>
-              )}
+              </div>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  id="customer-password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="w-full pl-10 pr-11 py-3 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:border-[#9C5550] focus:ring-1 focus:ring-[#9C5550] outline-none transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#786866] hover:text-[#313851] transition-colors p-1"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
-            <div className="relative">
-              <Lock className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                name="password"
-                required
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={isAdminLogin ? "Enter password" : "Enter your password"}
-                className="w-full pl-10 pr-11 py-3 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3] text-sm text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:border-[#9C5550] focus:ring-1 focus:ring-[#9C5550] outline-none transition-all"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                tabIndex={-1}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#786866] hover:text-[#313851] transition-colors p-1"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full py-3.5 rounded-full bg-gradient-to-r from-[#B26661] via-[#9C5550] to-[#8A4743] text-[#FFFDFC] text-sm font-semibold tracking-wide shadow-xs hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
-          >
-            {submitting ? (
-              <span className="flex items-center gap-2">
-                <span className="w-4 h-4 border-2 border-[#FFFDFC] border-t-transparent rounded-full animate-spin" />
-                Signing In...
-              </span>
-            ) : (
-              <>
-                <span>{isAdminLogin ? 'Sign In to Admin Portal' : 'Sign In to Atelier'}</span>
-                <ArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full py-3.5 rounded-full bg-gradient-to-r from-[#B26661] via-[#9C5550] to-[#8A4743] text-[#FFFDFC] text-sm font-semibold tracking-wide shadow-xs hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+            >
+              {submitting ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-[#FFFDFC] border-t-transparent rounded-full animate-spin" />
+                  Signing In...
+                </span>
+              ) : (
+                <>
+                  <span>Sign In to Atelier</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </form>
+        )}
 
         {/* Signup Redirect - Only shown for customer portal */}
         {!isAdminLogin && (
