@@ -132,18 +132,99 @@ export default function Cart() {
               boxShadow: '0 14px 36px rgba(49, 56, 81, 0.06)'
             }}
           >
-            {/* 1. Stagger Entrance: Shopping Bag Logo Container with Subtle Floating & Frame Hover */}
+            {/* 1. Stagger Entrance: Boutique Shopping Bag Logo Frame with Subtle Float */}
             <div className="cart-animate-entrance" style={{ animationDelay: '0ms' }}>
-              <div className="cart-bag-float">
+              <div className="cart-bag-float flex justify-center">
                 <div 
-                  className="cart-bag-frame w-20 h-20 mx-auto rounded-3xl bg-[#F4ECE6]/90 border border-[#D8C6C3]/80 flex items-center justify-center p-3.5 shadow-xs cursor-pointer"
-                  title="Nailsbyhelina Atelier"
+                  className="cart-boutique-bag relative w-[74px] h-[82px] sm:w-[86px] sm:h-[94px] mx-auto select-none"
+                  style={{
+                    filter: 'drop-shadow(0 8px 22px rgba(49, 56, 81, 0.07))'
+                  }}
                 >
-                  <img
-                    src="/helinart-logo.png"
-                    alt="Nailsbyhelina Atelier"
-                    className="w-12 h-12 object-contain drop-shadow-2xs select-none"
-                  />
+                  {/* Shopping Bag Vector Silhouette with Dual Curved Handles & Tapered Body */}
+                  <svg
+                    viewBox="0 0 86 94"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-full h-full block"
+                    aria-hidden="true"
+                  >
+                    <defs>
+                      <linearGradient id="boutiqueBagGradient" x1="12" y1="24" x2="74" y2="92" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stopColor="#FFFDFC" stopOpacity="0.96" />
+                        <stop offset="55%" stopColor="#F4ECE6" stopOpacity="0.92" />
+                        <stop offset="100%" stopColor="#EEE6DE" stopOpacity="0.90" />
+                      </linearGradient>
+                      <linearGradient id="boutiqueHandleFront" x1="26" y1="2" x2="60" y2="28" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stopColor="#D49E99" />
+                        <stop offset="100%" stopColor="#C98F8A" />
+                      </linearGradient>
+                      <linearGradient id="boutiqueHandleBack" x1="32" y1="6" x2="54" y2="28" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stopColor="#D6B47E" />
+                        <stop offset="100%" stopColor="#C8A46A" />
+                      </linearGradient>
+                    </defs>
+
+                    {/* Back Handle (Delicate antique-gold curved handle) */}
+                    <path
+                      d="M 32,26 C 32,7 54,7 54,26"
+                      stroke="url(#boutiqueHandleBack)"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      fill="none"
+                      opacity="0.85"
+                    />
+
+                    {/* Shopping Bag Body (Tapered sides, rounded lower corners, thin luxury outline) */}
+                    <path
+                      d="M 12,27
+                         C 12,25.5 14,24.5 16,24.5
+                         L 70,24.5
+                         C 72,24.5 74,25.5 74,27
+                         L 78.5,72
+                         C 79.5,83 71,91 60,91
+                         L 26,91
+                         C 15,91 6.5,83 7.5,72
+                         Z"
+                      fill="url(#boutiqueBagGradient)"
+                      stroke="rgba(201, 143, 138, 0.35)"
+                      strokeWidth="1"
+                      strokeLinejoin="round"
+                    />
+
+                    {/* Subtle Top Rim Turnover / Atelier Crease Detail */}
+                    <path
+                      d="M 14,28.5 L 72,28.5"
+                      stroke="rgba(201, 143, 138, 0.22)"
+                      strokeWidth="0.8"
+                      strokeLinecap="round"
+                    />
+
+                    {/* Front Handle (Soft rose-gold curved handle) */}
+                    <path
+                      d="M 27,26 C 27,3 59,3 59,26"
+                      stroke="url(#boutiqueHandleFront)"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      fill="none"
+                    />
+
+                    {/* Delicate Metallic Eyelets / Handle Anchors */}
+                    <circle cx="27" cy="26.5" r="1.4" fill="#C98F8A" />
+                    <circle cx="59" cy="26.5" r="1.4" fill="#C98F8A" />
+                  </svg>
+
+                  {/* Centered Nailsbyhelina Logo (Preserving original aspect ratio & artwork) */}
+                  <div 
+                    className="absolute left-0 right-0 flex items-center justify-center pointer-events-none"
+                    style={{ top: '24px', bottom: '3px' }}
+                  >
+                    <img
+                      src="/helinart-logo.png"
+                      alt="Nailsbyhelina Atelier"
+                      className="w-[30px] h-[30px] sm:w-[36px] sm:h-[36px] object-contain drop-shadow-2xs select-none"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
