@@ -428,6 +428,37 @@ input:focus, select:focus, textarea:focus {
   animation: sparkleGlint 3.5s ease-in-out infinite 0.6s;
 }
 
+/* =========================================================================
+   LUXURY EMPTY CART WATERMARK & SPARKLE ANIMATIONS
+   ========================================================================= */
+@keyframes cartLogoFloat {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-10px) scale(1.01);
+  }
+}
+
+.cart-watermark-float {
+  animation: cartLogoFloat 7s ease-in-out infinite;
+}
+
+@keyframes sparklePulseSlow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.15);
+  }
+}
+
+.sparkle-pulse-slow {
+  animation: sparklePulseSlow 4.5s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .logo-reveal-anim,
   .logo-float-anim,
@@ -438,8 +469,11 @@ input:focus, select:focus, textarea:focus {
   .sparkle-anim-2,
   .sparkle-anim-3,
   .sparkle-anim-4,
-  .sparkle-anim-5 {
+  .sparkle-anim-5,
+  .cart-watermark-float,
+  .sparkle-pulse-slow {
     animation: none !important;
   }
 }
+
 

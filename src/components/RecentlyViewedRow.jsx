@@ -8,7 +8,7 @@ export default function RecentlyViewedRow({ excludeId = null, title = 'Recently 
   const { recentlyViewed } = useStore();
 
   // Find products matching the recently viewed IDs
-  const matching = recentlyViewed
+  const matching = (recentlyViewed || [])
     .filter(id => id !== excludeId)
     .map(id => products.find(p => p.id === id))
     .filter(Boolean);

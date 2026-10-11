@@ -88,7 +88,7 @@ export default function LookbookGrid() {
   }, []);
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="lookbook" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-24">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
         <div>

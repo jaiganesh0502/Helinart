@@ -8,12 +8,26 @@ export default function EmptyState({
   description = 'Try adjusting your filters or search terms to discover our handcrafted nail designs.',
   actionLabel = 'Explore All Sets',
   actionTo = '/shop',
+  buttonText,
+  buttonLink,
   onActionClick
 }) {
+  const label = buttonText || actionLabel;
+  const link = buttonLink || actionTo;
+
+  const renderIcon = () => {
+    if (React.isValidElement(icon)) return icon;
+    if (typeof icon === 'function') {
+      const IconComp = icon;
+      return <IconComp className="w-8 h-8 text-[#9C5550]" />;
+    }
+    return icon;
+  };
+
   return (
     <div className="text-center py-16 px-6 max-w-md mx-auto bg-glass-card rounded-3xl border border-[#D8C6C3] backdrop-blur-sm my-8 shadow-sm">
       <div className="w-16 h-16 mx-auto mb-4 rounded-3xl bg-[#F4ECE6] border border-[#D8C6C3] flex items-center justify-center text-3xl shadow-inner">
-        {icon}
+        {renderIcon()}
       </div>
       <h3 className="font-heading font-medium text-2xl text-[#313851] mb-2">
         {title}
@@ -22,12 +36,12 @@ export default function EmptyState({
         {description}
       </p>
 
-      {actionTo && !onActionClick ? (
+      {link && !onActionClick ? (
         <Link
-          to={actionTo}
+          to={link}
           className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#B26661] via-[#9C5550] to-[#8A4743] text-[#FFFDFC] text-sm font-medium shadow-sm hover:scale-105 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9C5550]"
         >
-          <span>{actionLabel}</span>
+          <span>{label}</span>
           <ArrowRight className="w-4 h-4 text-[#FFFDFC]" />
         </Link>
       ) : onActionClick ? (
@@ -35,7 +49,7 @@ export default function EmptyState({
           onClick={onActionClick}
           className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#B26661] via-[#9C5550] to-[#8A4743] text-[#FFFDFC] text-sm font-medium shadow-sm hover:scale-105 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9C5550]"
         >
-          <span>{actionLabel}</span>
+          <span>{label}</span>
           <ArrowRight className="w-4 h-4 text-[#FFFDFC]" />
         </button>
       ) : null}

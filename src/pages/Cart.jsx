@@ -2,16 +2,17 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   ShoppingBag, Trash2, ArrowRight, Tag, ShieldCheck, Truck, 
-  Sparkles, Check, ArrowLeft, Ruler 
+  Sparkles, Check, ArrowLeft, Ruler, AlertCircle, RotateCcw
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import RecentlyViewedRow from '../components/RecentlyViewedRow';
-import EmptyState from '../components/EmptyState';
+import ProductCard from '../components/ProductCard';
+import { products } from '../data/products';
 import SEO from '../components/SEO';
 
 export default function Cart() {
   const navigate = useNavigate();
-  const { cart, updateCartQuantity, removeFromCart, getCartSummary, applyCoupon, removeCoupon } = useStore();
+  const { cart, updateCartQuantity, removeFromCart, getCartSummary, applyCoupon, removeCoupon, recentlyViewed } = useStore();
   const [couponInput, setCouponInput] = useState('');
   
   const summary = getCartSummary();
@@ -23,21 +24,218 @@ export default function Cart() {
     setCouponInput('');
   };
 
-  if (cart.length === 0) {
+  // =========================================================================
+  // 1. ACTUAL CART FAILURE STATE (Strictly separated from empty cart state)
+  // =========================================================================
+  if (!Array.isArray(cart)) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-12">
+      <div className="max-w-xl mx-auto px-4 py-24 text-center space-y-6">
+        <SEO title="Shopping Bag" description="Atelier shopping bag status." />
+        <div className="w-16 h-16 mx-auto rounded-3xl bg-[#F4ECE6] border border-[#D8C6C3] flex items-center justify-center p-3.5 shadow-inner">
+          <AlertCircle className="w-8 h-8 text-[#9C5550]" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="font-heading font-medium text-2xl sm:text-3xl text-[#313851]">
+            We couldn’t load your cart right now
+          </h1>
+          <p className="text-sm text-[#786866] max-w-md mx-auto">
+            An unexpected connection issue occurred while syncing your shopping bag. Please try again or return to the atelier home.
+          </p>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+          <button
+            onClick={() => window.location.reload()}
+            className="inline-flex items-center justify-center gap-2 py-3 px-6 rounded-full bg-gradient-to-r from-[#B26661] via-[#9C5550] to-[#8A4743] text-[#FFFDFC] text-xs font-semibold uppercase tracking-wider shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all"
+          >
+            <RotateCcw className="w-4 h-4" />
+            <span>Try Again</span>
+          </button>
+          <Link
+            to="/"
+            className="inline-flex items-center justify-center py-3 px-6 rounded-full bg-[#F6F3ED] text-[#313851] text-xs font-semibold uppercase tracking-wider hover:bg-[#EFE9DF] border border-[#D8C6C3] transition-all"
+          >
+            Return Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // 2. LUXURY EMPTY CART EXPERIENCE (Nailsbyhelina Branded Editorial State)
+  // =========================================================================
+  if (cart.length === 0) {
+    const popularPicks = (products || [])
+      .filter((p) => p.isBestSeller)
+      .slice(0, 4);
+
+    return (
+      <div className="relative min-h-[75vh] flex flex-col justify-between py-12 sm:py-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <SEO
           title="Shopping Bag"
-          description="Your Nailsbyhelina shopping bag is currently empty. Explore our handcrafted collections or reserve a private studio slot."
+          description="Your Nailsbyhelina shopping bag is currently waiting for something beautiful. Explore handcrafted press-ons and couture finishes."
         />
-        <EmptyState
-          title="Your Shopping Bag is Empty"
-          description="You haven't added any luxury press-on sets or gel kits to your bag yet. Explore our handcrafted collections or reserve a studio slot."
-          buttonText="Explore Nail Sets"
-          buttonLink="/shop"
-          icon={ShoppingBag}
-        />
-        <RecentlyViewedRow title="Products You Viewed Earlier" />
+
+        {/* -----------------------------------------------------------------
+            A. LARGE SUBTLE BACKGROUND LOGO WATERMARK & AMBIENT RADIAL GLOW
+            ----------------------------------------------------------------- */}
+        <div 
+          className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden -z-10"
+          aria-hidden="true"
+        >
+          {/* Soft ambient champagne & rose radial glow */}
+          <div 
+            className="absolute w-[500px] h-[500px] sm:w-[750px] sm:h-[750px] rounded-full blur-3xl opacity-70 pointer-events-none"
+            style={{
+              background: 'radial-gradient(circle at 50% 50%, rgba(201, 143, 138, 0.09) 0%, rgba(200, 164, 106, 0.05) 40%, rgba(246, 243, 237, 0) 70%)'
+            }}
+          />
+
+          {/* Large delicate logo watermark with subtle floating animation */}
+          <img
+            src="/helinart-logo.png"
+            alt=""
+            className="cart-watermark-float w-72 h-72 sm:w-96 sm:h-96 md:w-[480px] md:h-[480px] object-contain opacity-[0.065] transform-gpu transition-opacity"
+          />
+        </div>
+
+        {/* -----------------------------------------------------------------
+            B. FOREGROUND LUXURY EMPTY CART GLASS CARD
+            ----------------------------------------------------------------- */}
+        <div className="relative max-w-xl mx-auto w-full my-auto z-10">
+          
+          {/* Subtle Decorative Sparkles Around Card */}
+          <div className="absolute -top-4 -left-3 sm:-left-6 pointer-events-none select-none sparkle-pulse-slow text-[#C8A46A]" aria-hidden="true">
+            <Sparkles className="w-5 h-5 opacity-60" />
+          </div>
+          <div className="absolute top-1/4 -right-2 sm:-right-6 pointer-events-none select-none sparkle-pulse-slow text-[#C98F8A]" style={{ animationDelay: '1.2s' }} aria-hidden="true">
+            <Sparkles className="w-4 h-4 opacity-50" />
+          </div>
+          <div className="absolute -bottom-3 left-10 pointer-events-none select-none sparkle-pulse-slow text-[#C2CBD3]" style={{ animationDelay: '2.4s' }} aria-hidden="true">
+            <Sparkles className="w-3.5 h-3.5 opacity-55" />
+          </div>
+
+          {/* Luxury Glass Card Container */}
+          <div 
+            className="rounded-[28px] p-8 sm:p-12 text-center space-y-6 sm:space-y-7 transition-all"
+            style={{
+              background: 'rgba(255, 253, 252, 0.82)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(216, 198, 195, 0.55)',
+              boxShadow: '0 18px 40px rgba(49, 56, 81, 0.08)'
+            }}
+          >
+            {/* Small Foreground Logo Container */}
+            <div className="w-20 h-20 mx-auto rounded-3xl bg-[#F4ECE6]/90 border border-[#D8C6C3]/80 flex items-center justify-center p-3.5 shadow-inner">
+              <img
+                src="/helinart-logo.png"
+                alt="Nailsbyhelina Atelier"
+                className="w-12 h-12 object-contain drop-shadow-2xs"
+              />
+            </div>
+
+            {/* Typography Hierarchy */}
+            <div className="space-y-3">
+              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.24em] text-[#B77F7B]">
+                YOUR SHOPPING BAG
+              </p>
+              <h1 className="font-heading font-medium text-3xl sm:text-4xl text-[#313851] tracking-tight leading-tight">
+                Your cart is empty
+              </h1>
+              <p className="text-sm sm:text-[15px] text-[#786866] leading-relaxed max-w-md mx-auto font-normal">
+                Looks like you haven’t added any nail sets yet. Explore handcrafted press-ons, couture finishes and signature looks made to elevate your style.
+              </p>
+            </div>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-1">
+              <Link
+                to="/shop"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-gradient-to-r from-[#B26661] via-[#9C5550] to-[#8A4743] text-[#FFFDFC] text-xs sm:text-sm font-semibold tracking-wider uppercase shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9C5550]"
+              >
+                <span>Explore Nail Sets</span>
+                <ArrowRight className="w-4 h-4 text-[#FFFDFC]" />
+              </Link>
+              <Link
+                to="/shop?sort=bestseller"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-[#F6F3ED] text-[#313851] border border-[#D8C6C3] text-xs sm:text-sm font-semibold tracking-wider uppercase hover:bg-[#EFE9DF] hover:border-[#B77F7B]/50 hover:text-[#9C5550] transition-all shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9C5550]"
+              >
+                <span>Shop Bestsellers</span>
+              </Link>
+            </div>
+
+            {/* Soft Link */}
+            <div className="pt-0.5">
+              <Link
+                to="/#lookbook"
+                className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-[#9C5550] hover:text-[#793D39] font-medium transition-colors underline-offset-4 hover:underline"
+              >
+                <span>Need inspiration? Explore the Lookbook</span>
+                <ArrowRight className="w-3.5 h-3.5 text-[#9C5550]" />
+              </Link>
+            </div>
+
+            {/* Quick Action Chips */}
+            <div className="pt-4 border-t border-[#D8C6C3]/40 space-y-2.5">
+              <span className="text-[11px] uppercase tracking-wider text-[#786866] font-medium block">
+                Popular Aesthetics
+              </span>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {[
+                  { label: 'Almond', to: '/shop?q=Almond' },
+                  { label: 'Chrome / Glaze', to: '/shop?q=Chrome' },
+                  { label: 'French Tips', to: '/shop?q=French' },
+                  { label: '3D Art', to: '/shop?q=3D' },
+                  { label: 'Bridal', to: '/shop?q=Bridal' }
+                ].map((chip) => (
+                  <Link
+                    key={chip.label}
+                    to={chip.to}
+                    className="px-3.5 py-1.5 rounded-full text-xs font-medium bg-[#FFFDFC]/90 border border-[#D8C6C3] text-[#313851] hover:bg-[#F6F3ED] hover:border-[#9C5550] hover:text-[#9C5550] transition-all shadow-2xs"
+                  >
+                    {chip.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* -----------------------------------------------------------------
+            C. CURATED ATELIER PICKS / RECENTLY VIEWED ROW
+            ----------------------------------------------------------------- */}
+        <div className="w-full max-w-7xl mx-auto pt-14 space-y-12 z-10">
+          <RecentlyViewedRow title="Products You Viewed Earlier" />
+
+          {(!recentlyViewed || recentlyViewed.length === 0) && popularPicks.length > 0 && (
+            <div className="border-t border-[#D8C6C3]/60 pt-10 space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <span className="text-xs font-semibold text-[#B77F7B] uppercase tracking-wider">
+                    Atelier Highlights
+                  </span>
+                  <h2 className="font-heading font-medium text-2xl sm:text-3xl text-[#313851]">
+                    You May Love
+                  </h2>
+                </div>
+                <Link
+                  to="/shop?sort=bestseller"
+                  className="text-xs font-semibold text-[#9C5550] hover:text-[#793D39] inline-flex items-center gap-1 transition-colors"
+                >
+                  <span>View All Bestsellers</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {popularPicks.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     );
   }

@@ -15,12 +15,20 @@ export default function Shop() {
 
   // Search & Filter state synced with URL search params
   const categoryParam = searchParams.get('category') || 'All';
+  const queryParam = searchParams.get('q') || searchParams.get('search') || '';
+  const sortParam = searchParams.get('sort') || searchParams.get('filter') || 'featured';
   const [selectedCategory, setSelectedCategory] = useState(categoryParam);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('featured');
+  const [searchQuery, setSearchQuery] = useState(queryParam);
+  const [sortBy, setSortBy] = useState(sortParam);
 
   useEffect(() => {
     setSelectedCategory(searchParams.get('category') || 'All');
+    if (searchParams.has('q') || searchParams.has('search')) {
+      setSearchQuery(searchParams.get('q') || searchParams.get('search') || '');
+    }
+    if (searchParams.has('sort') || searchParams.has('filter')) {
+      setSortBy(searchParams.get('sort') || searchParams.get('filter') || 'featured');
+    }
   }, [searchParams]);
 
   useEffect(() => {
@@ -85,6 +93,8 @@ export default function Shop() {
       list.sort((a, b) => b.rating - a.rating);
     } else if (sortBy === 'newest') {
       list.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
+    } else if (sortBy === 'bestseller' || sortBy === 'bestsellers') {
+      list.sort((a, b) => (b.isBestSeller ? 1 : 0) - (a.isBestSeller ? 1 : 0) || b.rating - a.rating);
     }
 
     return list;
