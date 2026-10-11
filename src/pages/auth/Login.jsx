@@ -206,7 +206,7 @@ export default function Login() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-[#313851] uppercase tracking-wider mb-1.5">
               EMAIL ADDRESS
@@ -214,10 +214,11 @@ export default function Login() {
             <div className="relative">
               <Mail className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
+                id="email"
                 type="email"
-                name="nbh-login-email"
+                name="email"
                 required
-                autoComplete="off"
+                autoComplete="username email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={isAdminLogin ? "Enter admin email" : "Enter your email address"}
@@ -243,10 +244,11 @@ export default function Login() {
             <div className="relative">
               <Lock className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
+                id="password"
                 type={showPassword ? "text" : "password"}
-                name="nbh-login-password"
+                name="password"
                 required
-                autoComplete="new-password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={isAdminLogin ? "Enter password" : "Enter your password"}
