@@ -174,18 +174,6 @@ export default function Header({ dynamicSettings }) {
               </Link>
             </motion.div>
 
-            {/* Admin Dashboard Quick Access Button */}
-            {isAdmin && (
-              <Link
-                to="/admin/dashboard"
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#262D42] text-[#C8A46A] text-xs font-semibold hover:bg-[#313851] transition-all shadow-xs border border-[#C8A46A]/30"
-                title="Open Admin Portal Dashboard"
-              >
-                <Shield className="w-3.5 h-3.5 text-[#C8A46A]" />
-                <span>Admin Dashboard</span>
-              </Link>
-            )}
-
             {/* Profile / Account Button */}
             <motion.div
               whileHover={shouldReduceMotion ? {} : { scale: 1.07 }}
@@ -193,10 +181,10 @@ export default function Header({ dynamicSettings }) {
               transition={{ duration: 0.18 }}
             >
               <Link
-                to={isAdmin ? '/admin/dashboard' : (user ? '/profile' : '/login')}
+                to={user ? '/profile' : '/login'}
                 className="relative p-1.5 rounded-full text-[#313851] hover:text-[#9C5550] hover:bg-[#F4ECE6] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9C5550] flex items-center justify-center"
-                aria-label={isAdmin ? 'Admin Dashboard' : (user?.full_name?.trim() || (user ? 'My Account' : 'Sign In'))}
-                title={isAdmin ? 'Admin Dashboard' : (user?.full_name?.trim() || (user ? 'My Account' : 'Sign In'))}
+                aria-label={user?.full_name?.trim() || (user ? 'My Account' : 'Sign In')}
+                title={user?.full_name?.trim() || (user ? 'My Account' : 'Sign In')}
               >
                 {user && user?.full_name?.trim() ? (
                   <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#9C5550] to-[#C98F8A] text-[#FFFDFC] text-xs font-heading font-bold flex items-center justify-center shadow-2xs">
@@ -259,16 +247,6 @@ export default function Header({ dynamicSettings }) {
                 >
                   {user ? (user.full_name?.trim() || 'My Account') : 'Sign In / Register'}
                 </Link>
-
-                {isAdmin && (
-                  <Link
-                    to="/admin/dashboard"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block px-4 py-3 rounded-2xl text-base font-semibold text-[#FFFDFC] bg-[#262D42]"
-                  >
-                    Admin Portal Dashboard
-                  </Link>
-                )}
               </div>
             </motion.div>
           )}

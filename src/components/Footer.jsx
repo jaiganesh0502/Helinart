@@ -12,8 +12,15 @@ export default function Footer({ dynamicSettings, dynamicContent }) {
   const [emailInput, setEmailInput] = useState('');
   const [subscribed, setSubscribed] = useState(false);
 
-  const footerBlurb = dynamicContent?.footer_text ||
+  const footerBlurb = dynamicContent?.footer_text || dynamicContent?.brand_mission || dynamicContent?.short_description ||
     'Elevating modern self-care with couture press-on sets, bespoke gel art kits, and handcrafted reusable nail designs delivered across India.';
+  const newsletterHeading = dynamicContent?.newsletter_heading || 'The Atelier Gazette';
+  const newsletterDesc = dynamicContent?.newsletter_description ||
+    'Subscribe for private collection drops, nail rituals, and 10% off your first order.';
+  const conciergeHeading = dynamicContent?.concierge_heading || 'Atelier Concierge Desk';
+  const businessHours = dynamicContent?.business_hours || 'Mon – Sun: 10:00 AM – 7:00 PM (WhatsApp & Email)';
+  const copyrightText = dynamicContent?.copyright_text || `© ${new Date().getFullYear()} Nailsbyhelina Luxury Nail Studio. All rights reserved.`;
+
   const whatsappNumber = dynamicSettings?.whatsapp_number || '+91 93614 05676';
   const whatsappRaw = dynamicSettings?.whatsapp_raw_number || '919361405676';
   const instagramHandle = dynamicSettings?.instagram_handle || '@nails.by.helina';
@@ -193,12 +200,12 @@ export default function Footer({ dynamicSettings, dynamicContent }) {
               YT
             </a>
             <a 
-              href="https://wa.me/919361405676?text=Hi%20Nailsbyhelina%2C%20I%E2%80%99d%20like%20to%20know%20more%20about%20your%20nail%20sets." 
+              href={`https://wa.me/${whatsappRaw}?text=${encodeURIComponent('Hi Nailsbyhelina, I’d like to know more about your nail sets.')}`} 
               target="_blank" 
               rel="noopener noreferrer" 
               className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-[#FFFDFC] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9C5550]"
-              aria-label="Chat with Nailsbyhelina Concierge on WhatsApp (+91 93614 05676)"
-              title="WhatsApp: +91 93614 05676"
+              aria-label={`Chat with Nailsbyhelina Concierge on WhatsApp (${whatsappNumber})`}
+              title={`WhatsApp: ${whatsappNumber}`}
             >
               WA
             </a>
@@ -220,7 +227,7 @@ export default function Footer({ dynamicSettings, dynamicContent }) {
 
         {/* Column 3: Atelier Services & Guidance */}
         <div>
-          <h4 className="font-heading font-medium text-base text-[#FFFDFC] mb-4">Studio Concierge</h4>
+          <h4 className="font-heading font-medium text-base text-[#FFFDFC] mb-4">{conciergeHeading}</h4>
           <ul className="space-y-2 text-xs sm:text-sm text-[#C2CBD3]">
             <li><Link to="/book" className="hover:text-[#D8A19B] transition-colors font-medium text-[#FFFDFC]">{studioBookingEnabled ? 'Book Studio Slot' : 'Studio Opening Soon'}</Link></li>
             <li><Link to="/size-guide" className="hover:text-[#D8A19B] transition-colors">Sizing Guide & mm Chart</Link></li>
@@ -234,9 +241,9 @@ export default function Footer({ dynamicSettings, dynamicContent }) {
         {/* Column 4: Newsletter & Policies */}
         <div className="space-y-4">
           <div>
-            <h4 className="font-heading font-medium text-base text-[#FFFDFC] mb-2">The Atelier Gazette</h4>
+            <h4 className="font-heading font-medium text-base text-[#FFFDFC] mb-2">{newsletterHeading}</h4>
             <p className="text-xs text-[#C2CBD3] leading-relaxed mb-3">
-              Subscribe for private collection drops, nail rituals, and 10% off your first order.
+              {newsletterDesc}
             </p>
 
             {subscribed ? (
@@ -273,8 +280,8 @@ export default function Footer({ dynamicSettings, dynamicContent }) {
           </div>
 
           <div className="text-xs text-[#C2CBD3] space-y-1 pt-2 border-t border-[#3A425E]/60">
-            <p className="font-medium text-[#FFFDFC]">Atelier Concierge Desk</p>
-            <p>Mon – Sun: 10:00 AM – 7:00 PM (WhatsApp & Email)</p>
+            <p className="font-medium text-[#FFFDFC]">{conciergeHeading}</p>
+            <p>{businessHours}</p>
             <p className="text-[#A8C1A2]">● Online store open 24/7</p>
           </div>
         </div>
@@ -288,15 +295,14 @@ export default function Footer({ dynamicSettings, dynamicContent }) {
       >
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           
-          {/* Policy Links */}
+          {/* Policy Links: Exclusively Customer Informational Pages (NO Admin Link) */}
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[#C2CBD3]">
             <Link to="/about" className="hover:text-[#D8A19B] transition-colors">About</Link>
             <Link to="/faq" className="hover:text-[#D8A19B] transition-colors">FAQ</Link>
             <Link to="/contact" className="hover:text-[#D8A19B] transition-colors">Contact</Link>
             <Link to="/shipping-returns" className="hover:text-[#D8A19B] transition-colors">Shipping & Returns</Link>
             <Link to="/privacy-policy" className="hover:text-[#D8A19B] transition-colors">Privacy Policy</Link>
-            <Link to="/terms" className="hover:text-[#D8A19B] transition-colors">Terms of Service</Link>
-            <Link to="/admin/login" className="hover:text-[#D8A19B] transition-colors text-[#C8A46A]">Admin Portal</Link>
+            <Link to="/terms-of-service" className="hover:text-[#D8A19B] transition-colors">Terms of Service</Link>
           </div>
 
           {/* Supported Payment Badges */}
@@ -311,7 +317,7 @@ export default function Footer({ dynamicSettings, dynamicContent }) {
         </div>
 
         <div className="max-w-7xl mx-auto text-center md:text-left pt-4 border-t border-[#3A425E]/40 mt-4 text-[11px] text-[#C2CBD3]/60 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p>© {new Date().getFullYear()} Nailsbyhelina Luxury Nail Studio. All rights reserved.</p>
+          <p>{copyrightText}</p>
           <p>Handcrafted with love & precision in India.</p>
         </div>
       </div>

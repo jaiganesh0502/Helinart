@@ -61,27 +61,12 @@ export default function Profile() {
               <h1 className="font-heading text-2xl sm:text-3xl text-[#313851]">
                 {user?.full_name?.trim() || 'My Account'}
               </h1>
-              {isAdmin && (
-                <span className="px-2.5 py-0.5 rounded-full bg-[#262D42] text-[#C8A46A] text-[10px] font-bold tracking-wider uppercase border border-[#C8A46A]/30">
-                  Admin
-                </span>
-              )}
             </div>
             <p className="text-xs text-[#786866] mt-0.5">{user?.email}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          {isAdmin && (
-            <Link
-              to="/admin/dashboard"
-              className="flex-1 sm:flex-none px-4 py-2 rounded-full bg-[#262D42] text-[#C8A46A] text-xs font-semibold hover:bg-[#313851] transition-colors flex items-center justify-center gap-1.5 shadow-xs"
-            >
-              <Shield className="w-3.5 h-3.5" />
-              <span>Admin Portal</span>
-            </Link>
-          )}
-
           <button
             onClick={handleLogout}
             className="flex-1 sm:flex-none px-4 py-2 rounded-full bg-[#F6F3ED] border border-[#D8C6C3] text-xs font-medium text-[#786866] hover:text-[#9C5550] hover:bg-[#F4ECE6] transition-colors flex items-center justify-center gap-1.5"
@@ -91,27 +76,6 @@ export default function Profile() {
           </button>
         </div>
       </div>
-
-      {/* Admin Quick Jump Banner */}
-      {isAdmin && (
-        <div className="p-4 sm:p-5 rounded-3xl bg-[#262D42] text-[#FFFDFC] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-[#C8A46A]/30 shadow-md">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#C8A46A]/20 flex items-center justify-center text-[#C8A46A] shrink-0">
-              <Shield className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-[#FFFDFC]">Administrator Session Active</p>
-              <p className="text-xs text-[#C2CBD3]">You are signed in as Nailsbyhelina administrator ({user?.email}).</p>
-            </div>
-          </div>
-          <Link
-            to="/admin/dashboard"
-            className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-gradient-to-r from-[#C8A46A] to-[#B38F56] text-[#262D42] text-xs font-bold hover:brightness-110 transition-all flex items-center justify-center gap-1.5 shadow-xs"
-          >
-            <span>Open Admin Dashboard →</span>
-          </Link>
-        </div>
-      )}
 
       {/* Profile Navigation Hub */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

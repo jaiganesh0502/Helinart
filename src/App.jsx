@@ -48,6 +48,7 @@ import AdminOrderDetail from './pages/admin/AdminOrderDetail';
 import AdminCustomers from './pages/admin/AdminCustomers';
 import AdminLookbook from './pages/admin/AdminLookbook';
 import AdminHomepage from './pages/admin/AdminHomepage';
+import AdminPages from './pages/admin/AdminPages';
 import AdminOffers from './pages/admin/AdminOffers';
 import AdminStudio from './pages/admin/AdminStudio';
 import AdminMedia from './pages/admin/AdminMedia';
@@ -90,6 +91,10 @@ export default function App() {
           <Route path="/shipping-returns" element={<ShippingReturns />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/terms-of-service" element={<Terms />} />
+          <Route path="/sizing-guide" element={<SizeGuide />} />
+          <Route path="/how-press-ons-work" element={<HowItWorks />} />
+          <Route path="/studio-concierge" element={<Book />} />
 
           {/* Customer Authentication */}
           <Route path="/login" element={<Login />} />
@@ -219,6 +224,14 @@ export default function App() {
           element={
             <AdminRoute>
               <AdminHomepage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/pages"
+          element={
+            <AdminRoute>
+              <AdminPages />
             </AdminRoute>
           }
         />

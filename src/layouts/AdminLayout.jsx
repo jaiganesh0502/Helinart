@@ -19,7 +19,8 @@ import {
   Menu,
   X,
   Shield,
-  Bell
+  Bell,
+  FileText
 } from 'lucide-react';
 
 const ADMIN_NAV_ITEMS = [
@@ -30,6 +31,7 @@ const ADMIN_NAV_ITEMS = [
   { to: '/admin/customers', label: 'Customers', icon: Users },
   { to: '/admin/lookbook', label: 'Lookbook CMS', icon: ImageIcon },
   { to: '/admin/homepage', label: 'Homepage CMS', icon: Home },
+  { to: '/admin/pages', label: 'Pages & Policies', icon: FileText },
   { to: '/admin/offers', label: 'Offers & Promos', icon: Tag },
   { to: '/admin/studio', label: 'Studio Booking', icon: CalendarCheck },
   { to: '/admin/media', label: 'Media Manager', icon: FolderArchive },

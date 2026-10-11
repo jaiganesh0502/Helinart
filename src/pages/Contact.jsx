@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle2, MessageSquare, Camera, Sparkles } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import SEO from '../components/SEO';
+import PageStatusWrapper from '../components/PageStatusWrapper';
 import { useAuth } from '../context/AuthContext';
 import { settingsService } from '../services/settingsService';
+import { pageService } from '../services/pageService';
 import { SOCIAL_LINKS } from '../config/social';
 import { apiClient } from '../api';
 
@@ -11,6 +13,9 @@ export default function Contact() {
   const { addToast } = useStore();
   const { user } = useAuth();
   const [siteSettings, setSiteSettings] = useState(null);
+  const [page, setPage] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
     name: user?.full_name || '',
     phone: user?.phone || '',
@@ -31,18 +36,26 @@ export default function Contact() {
     }
   }, [user]);
 
-  useEffect(() => {
-    let mounted = true;
-    async function load() {
-      try {
-        const s = await settingsService.getSettings();
-        if (mounted && s) setSiteSettings(s);
-      } catch (err) {
-        console.warn('Could not load site settings in Contact', err);
-      }
+  const loadData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [s, p] = await Promise.all([
+        settingsService.getSettings().catch(() => null),
+        pageService.getPageBySlug('contact').catch(() => null)
+      ]);
+      if (s) setSiteSettings(s);
+      if (p) setPage(p);
+    } catch (err) {
+      console.warn('Could not load data in Contact', err);
+      setError(err);
+    } finally {
+      setLoading(false);
     }
-    load();
-    return () => { mounted = false; };
+  };
+
+  useEffect(() => {
+    loadData();
   }, []);
 
   const instagramUrl = siteSettings?.instagram_url || SOCIAL_LINKS.instagram;
@@ -116,27 +129,30 @@ ${message}`;
     addToast('Opening WhatsApp with your inquiry! 💌', 'success');
   };
 
+  const pageContent = page?.content || {};
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16 space-y-12">
-      <SEO
-        title="Contact Us & Atelier Concierge Desk"
-        description={`Reach Nailsbyhelina concierge desk. Message us directly on WhatsApp (${whatsappNumber}), Instagram (${instagramHandle}), or send an inquiry.`}
-        keywords="contact nailsbyhelina, press on nails inquiry, nailsbyhelina whatsapp, customer care nailsbyhelina"
-      />
-      
-      {/* Editorial Title */}
-      <div className="text-center max-w-2xl mx-auto space-y-3">
-        <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#F4ECE6] border border-[#D8C6C3] text-xs font-medium text-[#793D39]">
-          <Mail className="w-3.5 h-3.5 text-[#9C5550]" />
-          <span>Atelier Concierge Desk</span>
+    <PageStatusWrapper loading={loading} error={error} page={page} onRetry={loadData}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16 space-y-12">
+        <SEO
+          title={page?.seo_title || page?.title || "Contact Us & Atelier Concierge Desk"}
+          description={page?.seo_description || page?.subtitle || `Reach Nailsbyhelina concierge desk. Message us directly on WhatsApp (${whatsappNumber}), Instagram (${instagramHandle}), or send an inquiry.`}
+          keywords="contact nailsbyhelina, press on nails inquiry, nailsbyhelina whatsapp, customer care nailsbyhelina"
+        />
+        
+        {/* Editorial Title */}
+        <div className="text-center max-w-2xl mx-auto space-y-3">
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#F4ECE6] border border-[#D8C6C3] text-xs font-medium text-[#793D39]">
+            <Mail className="w-3.5 h-3.5 text-[#9C5550]" />
+            <span>{page?.subtitle || "Atelier Concierge Desk"}</span>
+          </div>
+          <h1 className="font-heading font-medium text-4xl sm:text-5xl text-[#313851]">
+            {page?.title || "Get in Touch with Nailsbyhelina"}
+          </h1>
+          <p className="text-sm sm:text-base text-[#786866] leading-relaxed">
+            {pageContent.supportMessage || "Whether you need personalized sizing advice, wish to commission a bridal suite, or have questions about an existing order, our concierge is here for you."}
+          </p>
         </div>
-        <h1 className="font-heading font-medium text-4xl sm:text-5xl text-[#313851]">
-          Get in Touch with Nailsbyhelina
-        </h1>
-        <p className="text-sm sm:text-base text-[#786866] leading-relaxed">
-          Whether you need personalized sizing advice, wish to commission a bridal suite, or have questions about an existing order, our concierge is here for you.
-        </p>
-      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         
@@ -333,7 +349,7 @@ ${message}`;
                 <Sparkles className="w-4 h-4 text-[#9C5550] shrink-0 mt-0.5" />
                 <div>
                   <strong className="text-[#313851] block">Store Operation Mode</strong>
-                  <span>Online Nail Boutique Only • Express Nationwide Shipping</span>
+                  <span>{pageContent.studioStatus || 'Online Nail Boutique Only • Express Nationwide Shipping'}</span>
                   <span className="block text-[#786866] mt-0.5">Physical Studio Appointments: Coming Soon</span>
                 </div>
               </div>
@@ -342,8 +358,8 @@ ${message}`;
                 <Clock className="w-4 h-4 text-[#A87F45] shrink-0 mt-0.5" />
                 <div>
                   <strong className="text-[#313851] block">Concierge Desk Hours</strong>
-                  <span>Monday – Sunday: 10:00 AM – 7:00 PM (IST)</span>
-                  <span className="block text-[#786866]">Online store accepts orders 24 hours a day</span>
+                  <span>{pageContent.businessHours || 'Monday – Sunday: 10:00 AM – 7:00 PM (IST)'}</span>
+                  <span className="block text-[#786866]">{pageContent.responseTime || 'Online store accepts orders 24 hours a day'}</span>
                 </div>
               </div>
 
@@ -406,5 +422,6 @@ ${message}`;
       </div>
 
     </div>
+    </PageStatusWrapper>
   );
 }

@@ -197,6 +197,21 @@ export default function AdminSettings() {
             </span>
           </div>
 
+          {/* CMS Link Card */}
+          <div className="p-4 rounded-2xl bg-[#FFFDFC] border border-[#D8C6C3] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span className="text-xs font-semibold text-[#313851] block">Informational Pages, Policies & Footer CMS</span>
+              <p className="text-[11px] text-[#786866]">Manage About, FAQ, Shipping & Returns, Privacy, Terms, and global Footer copy.</p>
+            </div>
+            <Link
+              to="/admin/pages"
+              className="px-4 py-2 rounded-xl text-xs font-semibold bg-[#262D42] text-[#FFFDFC] hover:bg-[#313851] transition-colors shrink-0 flex items-center gap-1.5"
+            >
+              <span>Pages & Policies CMS</span>
+              <ExternalLink className="w-3.5 h-3.5 text-[#C8A46A]" />
+            </Link>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
             <div>
               <label className="block text-xs font-semibold text-[#313851] mb-1.5">

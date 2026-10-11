@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { getOrderByNumber, getOrders } from '../api';
 import SEO from '../components/SEO';
+import { pageService } from '../services/pageService';
 
 export default function TrackOrder() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -16,11 +17,15 @@ export default function TrackOrder() {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [recentOrders, setRecentOrders] = useState([]);
+  const [page, setPage] = useState(null);
 
   useEffect(() => {
     getOrders().then(orders => {
       setRecentOrders(orders.slice(0, 3));
     });
+    pageService.getPageBySlug('track-order').then(p => {
+      if (p) setPage(p);
+    }).catch(() => {});
   }, []);
 
   const fetchOrder = async (numberToFind) => {
@@ -277,6 +282,32 @@ export default function TrackOrder() {
           >
             Load Sample Order (HLN-582914)
           </button>
+        </div>
+      )}
+
+      {/* CMS INFORMATION CARD (Admin Editable) */}
+      {page && (
+        <div className="bg-[#FFFDFC] rounded-3xl p-6 sm:p-8 border border-[#D8C6C3] shadow-xs space-y-4 text-xs sm:text-sm text-[#453A3C]">
+          <h3 className="font-heading font-medium text-lg text-[#313851]">
+            Courier Transit & Live Dispatch Information
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="p-4 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3]/60 space-y-1">
+              <span className="font-semibold text-[#313851] block text-xs">Courier Partners</span>
+              <p className="text-xs text-[#786866]">{page.content?.courierInfo || 'Blue Dart Air Express, Delhivery, and DTDC.'}</p>
+            </div>
+            <div className="p-4 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3]/60 space-y-1">
+              <span className="font-semibold text-[#313851] block text-xs">AWB Update Timings</span>
+              <p className="text-xs text-[#786866]">{page.content?.updateTimings || 'AWB tracking activates within 12 hours of dispatch scan.'}</p>
+            </div>
+            <div className="p-4 rounded-2xl bg-[#F6F3ED] border border-[#D8C6C3]/60 space-y-1">
+              <span className="font-semibold text-[#313851] block text-xs">Concierge Assistance</span>
+              <p className="text-xs text-[#786866]">{page.content?.supportContact || 'WhatsApp concierge at +91 93614 05676 for transit escalation.'}</p>
+            </div>
+          </div>
+          {page.content?.instructions && (
+            <p className="text-xs text-[#786866] pt-1 leading-relaxed">{page.content.instructions}</p>
+          )}
         </div>
       )}
 

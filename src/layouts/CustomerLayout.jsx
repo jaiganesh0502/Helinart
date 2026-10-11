@@ -6,6 +6,7 @@ import Footer from '../components/Footer';
 import FloatingWhatsApp from '../components/FloatingWhatsApp';
 import { settingsService } from '../services/settingsService';
 import { contentService } from '../services/contentService';
+import { pageService } from '../services/pageService';
 
 const LUXURY_EASE = [0.22, 1, 0.36, 1];
 
@@ -19,13 +20,16 @@ export default function CustomerLayout({ children }) {
     let mounted = true;
     async function loadGlobalCms() {
       try {
-        const [sRes, cRes] = await Promise.allSettled([
+        const [sRes, cRes, fRes] = await Promise.allSettled([
           settingsService.getSettings(),
-          contentService.getPublishedContent()
+          contentService.getPublishedContent(),
+          pageService.getFooterContent()
         ]);
         if (mounted) {
           if (sRes.status === 'fulfilled' && sRes.value) setSettings(sRes.value);
-          if (cRes.status === 'fulfilled' && cRes.value) setContent(cRes.value);
+          const baseContent = (cRes.status === 'fulfilled' && cRes.value) ? cRes.value : {};
+          const footerContent = (fRes.status === 'fulfilled' && fRes.value) ? fRes.value : {};
+          setContent({ ...baseContent, ...footerContent });
         }
       } catch (err) {
         console.warn('Global CMS load fallback', err);

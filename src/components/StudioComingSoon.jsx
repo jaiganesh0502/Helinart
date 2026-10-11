@@ -4,6 +4,7 @@ import { Sparkles, ArrowRight, Check, Bell, Camera, MessageSquare } from 'lucide
 import { useStore } from '../store/useStore';
 import SEO from './SEO';
 import { settingsService } from '../services/settingsService';
+import { pageService } from '../services/pageService';
 import { SOCIAL_LINKS } from '../config/social';
 
 export default function StudioComingSoon() {
@@ -11,13 +12,18 @@ export default function StudioComingSoon() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [siteSettings, setSiteSettings] = useState(null);
+  const [page, setPage] = useState(null);
 
   useEffect(() => {
     let mounted = true;
     async function load() {
       try {
-        const s = await settingsService.getSettings();
+        const [s, p] = await Promise.all([
+          settingsService.getSettings().catch(() => null),
+          pageService.getPageBySlug('studio-concierge').catch(() => null)
+        ]);
         if (mounted && s) setSiteSettings(s);
+        if (mounted && p) setPage(p);
       } catch (e) {
         console.warn('Could not load settings in StudioComingSoon', e);
       }
@@ -111,11 +117,15 @@ export default function StudioComingSoon() {
             {/* Supporting Copy */}
             <div className="space-y-3 text-sm sm:text-base text-[#786866] max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
               <p>
-                We’re currently creating beautiful nail experiences online.
-                Our private Nailsbyhelina studio will be opening soon for personalised nail art, extensions and one-to-one appointments.
+                {page?.content?.openingSoonMessage || (
+                  <>
+                    We’re currently creating beautiful nail experiences online.
+                    Our private Nailsbyhelina studio will be opening soon for personalised nail art, extensions and one-to-one appointments.
+                  </>
+                )}
               </p>
               <p className="font-medium text-[#313851]">
-                Until then, discover our handcrafted nail sets and shop your favourite looks online.
+                {page?.content?.bookingInfo || "Until then, discover our handcrafted nail sets and shop your favourite looks online."}
               </p>
             </div>
 

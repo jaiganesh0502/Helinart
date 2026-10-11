@@ -16,7 +16,8 @@ import {
   Sparkles,
   CalendarCheck,
   CheckCircle2,
-  ExternalLink
+  ExternalLink,
+  FileText
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -262,6 +263,14 @@ export default function AdminDashboard() {
                 >
                   <span>Manage Lookbook Drops</span>
                   <Sparkles className="w-4 h-4 text-[#9C5550]" />
+                </Link>
+
+                <Link
+                  to="/admin/pages"
+                  className="w-full py-2.5 px-4 rounded-xl bg-[#F6F3ED] border border-[#D8C6C3] text-[#313851] font-semibold flex items-center justify-between hover:bg-[#F4ECE6] transition-colors"
+                >
+                  <span>Pages & Policies CMS</span>
+                  <FileText className="w-4 h-4 text-[#793D39]" />
                 </Link>
               </div>
             </div>
