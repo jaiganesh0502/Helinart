@@ -18,12 +18,18 @@ export default function Login() {
   const [resendSuccess, setResendSuccess] = useState(false);
   const [justVerified, setJustVerified] = useState(false);
 
-  // Check URL hash for email verification redirects - DO NOT clear inputs on mount to respect browser autofill
+  // Reset application credential state and password visibility whenever login opens or route changes
   useEffect(() => {
+    setEmail('');
+    setPassword('');
+    setShowPassword(false);
+    setError('');
+    setResendSuccess(false);
+
     if (typeof window !== 'undefined' && (window.location.hash.includes('type=signup') || window.location.hash.includes('access_token'))) {
       setJustVerified(true);
     }
-  }, []);
+  }, [location.pathname]);
 
   const isAdminLogin = location.pathname === '/admin/login' || location.state?.from?.startsWith('/admin');
   const from = location.state?.from || (user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? '/admin/dashboard' : '/profile');
@@ -191,13 +197,13 @@ export default function Login() {
              =================================================================== */
           <form onSubmit={handleSubmit} autoComplete="on" className="space-y-4">
             <div>
-              <label htmlFor="admin-email" className="block text-xs font-semibold text-[#313851] uppercase tracking-wider mb-1.5">
+              <label htmlFor="login-email" className="block text-xs font-semibold text-[#313851] uppercase tracking-wider mb-1.5">
                 EMAIL ADDRESS
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
-                  id="admin-email"
+                  id="login-email"
                   name="username"
                   type="email"
                   required
@@ -212,14 +218,14 @@ export default function Login() {
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label htmlFor="admin-password" className="block text-xs font-semibold text-[#313851] uppercase tracking-wider">
+                <label htmlFor="login-password" className="block text-xs font-semibold text-[#313851] uppercase tracking-wider">
                   PASSWORD
                 </label>
               </div>
               <div className="relative">
                 <Lock className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
-                  id="admin-password"
+                  id="login-password"
                   name="password"
                   type={showPassword ? "text" : "password"}
                   required
@@ -265,14 +271,14 @@ export default function Login() {
              =================================================================== */
           <form onSubmit={handleSubmit} autoComplete="on" className="space-y-4">
             <div>
-              <label htmlFor="customer-email" className="block text-xs font-semibold text-[#313851] uppercase tracking-wider mb-1.5">
+              <label htmlFor="login-email" className="block text-xs font-semibold text-[#313851] uppercase tracking-wider mb-1.5">
                 EMAIL ADDRESS
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
-                  id="customer-email"
-                  name="email"
+                  id="login-email"
+                  name="username"
                   type="email"
                   required
                   autoComplete="username"
@@ -286,7 +292,7 @@ export default function Login() {
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label htmlFor="customer-password" className="block text-xs font-semibold text-[#313851] uppercase tracking-wider">
+                <label htmlFor="login-password" className="block text-xs font-semibold text-[#313851] uppercase tracking-wider">
                   PASSWORD
                 </label>
                 <Link
@@ -299,7 +305,7 @@ export default function Login() {
               <div className="relative">
                 <Lock className="w-4 h-4 text-[#786866] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
-                  id="customer-password"
+                  id="login-password"
                   name="password"
                   type={showPassword ? "text" : "password"}
                   required
@@ -333,7 +339,7 @@ export default function Login() {
                 </span>
               ) : (
                 <>
-                  <span>Sign In to Atelier</span>
+                  <span>Sign In</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
