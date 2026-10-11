@@ -12,12 +12,25 @@ function mapAuthError(err, context = 'login') {
 
   // Network or connectivity issue
   if (msg.includes('fetch') || msg.includes('network') || msg.includes('failed to fetch')) {
-    return "We couldn't connect. Please try again.";
+    return "We couldn't connect. Please check your internet connection and try again.";
+  }
+
+  // Rate limit error (Supabase default mailer limits ~3-4 emails/hr)
+  if (
+    msg.includes('rate limit') ||
+    code.includes('over_email_send_rate_limit') ||
+    code.includes('rate_limit') ||
+    status === 429
+  ) {
+    if (context === 'signup' || context === 'resend') {
+      return "Supabase email rate limit reached (Free tier permits ~3-4 emails/hr). Please check your Spam/Junk folder for previous verification emails, or wait a few minutes before trying again.";
+    }
+    return "Too many sign in attempts. Please wait a moment and try again.";
   }
 
   // Unconfirmed / pending email verification
   if (msg.includes('email not confirmed') || code.includes('email_not_confirmed')) {
-    return "Please verify your email before signing in.";
+    return "Please verify your email before signing in. Check your inbox and spam folder.";
   }
 
   // Account already exists
@@ -38,11 +51,6 @@ function mapAuthError(err, context = 'login') {
     code.includes('invalid_credentials')
   ) {
     return "Invalid email or password.";
-  }
-
-  // Rate limit
-  if (msg.includes('rate limit')) {
-    return "Too many sign in/up attempts. Please wait a moment and try again.";
   }
 
   return err.message || "An authentication error occurred. Please try again.";
@@ -80,10 +88,15 @@ export const authService = {
     const cleanPhone = (phone || '').trim();
 
     if (isSupabaseConfigured) {
+      const redirectUrl = typeof window !== 'undefined' && window.location.origin
+        ? `${window.location.origin}/login`
+        : 'https://nailsbyhelina.vercel.app/login';
+
       const { data, error } = await supabase.auth.signUp({
         email: cleanEmail,
         password,
         options: {
+          emailRedirectTo: redirectUrl,
           data: {
             full_name: cleanName,
             phone: cleanPhone || null,
@@ -185,9 +198,16 @@ export const authService = {
   async resendVerificationEmail(email) {
     const cleanEmail = email.trim().toLowerCase();
     if (isSupabaseConfigured) {
+      const redirectUrl = typeof window !== 'undefined' && window.location.origin
+        ? `${window.location.origin}/login`
+        : 'https://nailsbyhelina.vercel.app/login';
+
       const { error } = await supabase.auth.resend({
         type: 'signup',
-        email: cleanEmail
+        email: cleanEmail,
+        options: {
+          emailRedirectTo: redirectUrl
+        }
       });
       if (error) {
         throw new Error(mapAuthError(error, 'resend'));
@@ -203,8 +223,12 @@ export const authService = {
   async resetPassword(email) {
     const cleanEmail = email.trim().toLowerCase();
     if (isSupabaseConfigured) {
+      const redirectUrl = typeof window !== 'undefined' && window.location.origin
+        ? `${window.location.origin}/reset-password`
+        : 'https://nailsbyhelina.vercel.app/reset-password';
+
       const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
-        redirectTo: `${window.location.origin}/reset-password`
+        redirectTo: redirectUrl
       });
       if (error) {
         throw new Error(mapAuthError(error, 'reset'));
@@ -274,6 +298,21 @@ export const authService = {
           })
           .then(() => {})
           .catch(() => {});
+      } else if (!profile && user.id) {
+        // If customer profile doesn't exist yet, auto-create it
+        const fallbackName = user.user_metadata?.full_name || (user.email ? user.email.split('@')[0] : 'Customer');
+        const fallbackPhone = user.user_metadata?.phone || null;
+        supabase
+          .from('profiles')
+          .upsert({
+            id: user.id,
+            email: user.email,
+            role: 'customer',
+            full_name: fallbackName,
+            phone: fallbackPhone
+          })
+          .then(() => {})
+          .catch(e => console.warn('Could not auto-create customer profile:', e));
       }
 
       return {

@@ -96,10 +96,21 @@ export default function Signup() {
             <div className="w-12 h-12 mx-auto rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <Mail className="w-6 h-6" />
             </div>
-            <div className="space-y-1">
-              <h2 className="font-heading text-xl text-[#313851]">Please verify your email before signing in.</h2>
+            <div className="space-y-1.5">
+              <h2 className="font-heading text-xl text-[#313851]">Check Your Inbox to Verify</h2>
               <p className="text-xs text-[#786866] leading-relaxed">
-                We sent a confirmation link to <strong className="text-[#313851]">{email}</strong>. Please check your inbox and confirm your address to complete your registration.
+                We sent a confirmation link to <strong className="text-[#313851]">{email}</strong>. Please click the link inside to activate your customer account.
+              </p>
+            </div>
+
+            {/* Spam / Junk Notice Box */}
+            <div className="p-3.5 rounded-2xl bg-[#FFF8EE] border border-[#F3DFC1] text-xs text-[#8A5A18] text-left space-y-1">
+              <div className="flex items-center gap-1.5 font-semibold text-[#6E4208]">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                <span>Can't find the email?</span>
+              </div>
+              <p className="text-[11px] leading-relaxed">
+                Please check your <strong>Spam / Junk / Promotions</strong> folder. Verification emails are sent by Supabase authentication and may occasionally be filtered.
               </p>
             </div>
 
@@ -110,12 +121,19 @@ export default function Signup() {
               </div>
             )}
 
+            {error && (
+              <div className="p-3 rounded-xl bg-[#FDF2F1] text-[#9C5550] border border-[#F5C2BF] text-xs flex items-center justify-center gap-2">
+                <AlertCircle className="w-4 h-4 text-[#9C5550] shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
             <div className="pt-2 space-y-3">
               <button
                 type="button"
                 onClick={handleResend}
                 disabled={resending}
-                className="w-full py-3 rounded-full bg-[#F6F3ED] border border-[#D8C6C3] text-xs font-semibold text-[#313851] hover:bg-[#EAE4DC] transition-all flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-full bg-[#F6F3ED] border border-[#D8C6C3] text-xs font-semibold text-[#313851] hover:bg-[#EAE4DC] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>{resending ? 'Sending...' : 'Resend Verification Email'}</span>

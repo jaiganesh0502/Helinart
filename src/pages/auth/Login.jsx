@@ -15,6 +15,13 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false);
   const [resending, setResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
+  const [justVerified, setJustVerified] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window.location.hash.includes('type=signup') || window.location.hash.includes('access_token'))) {
+      setJustVerified(true);
+    }
+  }, []);
 
   const isAdminLogin = location.pathname === '/admin/login' || location.state?.from?.startsWith('/admin');
   const from = location.state?.from || (user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? '/admin/dashboard' : '/profile');
@@ -130,26 +137,39 @@ export default function Login() {
           </button>
         </div>
 
+        {justVerified && (
+          <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>Email verified successfully! You can now sign in to your atelier account.</span>
+          </div>
+        )}
+
         {resendSuccess && (
           <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Verification email resent! Please check your inbox.</span>
+            <span>Verification email resent! Please check your inbox and <strong>Spam</strong> folder.</span>
           </div>
         )}
 
         {error && (
-          <div className="p-3.5 rounded-2xl bg-[#FDF2F1] border border-[#F5C2BF] text-xs text-[#9C5550] space-y-2">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{error}</span>
+          <div className="p-3.5 rounded-2xl bg-[#FDF2F1] border border-[#F5C2BF] text-xs text-[#9C5550] space-y-2.5">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <div className="flex-1 leading-relaxed">
+                <span>{error}</span>
+              </div>
             </div>
-            {error.includes('verify your email') && (
-              <div className="pt-1">
+
+            {(error.includes('verify your email') || error.includes('rate limit')) && (
+              <div className="pt-2 border-t border-[#F5C2BF]/50 space-y-2">
+                <p className="text-[11px] text-[#786866] leading-relaxed">
+                  💡 <strong>Tip:</strong> Supabase confirmation emails often land in your <strong>Spam / Junk</strong> folder (sender: <code>noreply@mail.app.supabase.io</code>).
+                </p>
                 <button
                   type="button"
                   onClick={handleResendVerification}
                   disabled={resending}
-                  className="px-3 py-1.5 rounded-xl bg-[#9C5550] text-[#FFFDFC] text-xs font-semibold hover:bg-[#8A4743] transition-colors flex items-center gap-1.5"
+                  className="px-3 py-1.5 rounded-xl bg-[#9C5550] text-[#FFFDFC] text-xs font-semibold hover:bg-[#8A4743] transition-colors flex items-center gap-1.5 disabled:opacity-50"
                 >
                   <Send className="w-3 h-3" />
                   <span>{resending ? 'Sending...' : 'Resend Verification Email'}</span>
