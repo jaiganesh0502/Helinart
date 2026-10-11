@@ -4,10 +4,12 @@ import {
   Star, Heart, ShoppingBag, ShieldCheck, RefreshCw, Truck, 
   Ruler, Check, Bell, MapPin, ChevronRight, Share2, Sparkles, MessageSquarePlus, MessageSquare, Image as ImageIcon
 } from 'lucide-react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { getProductById, getProductReviews, addProductReview, checkPincodeDelivery } from '../api';
 import { useStore } from '../store/useStore';
 import SizeGuideModal from '../components/SizeGuideModal';
 import RecentlyViewedRow from '../components/RecentlyViewedRow';
+import Reveal from '../components/ui/Reveal';
 import SEO from '../components/SEO';
 import { useAuth } from '../context/AuthContext';
 import { settingsService } from '../services/settingsService';
@@ -27,6 +29,8 @@ export default function ProductDetails() {
   const [selectedDenomination, setSelectedDenomination] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState('');
+  const [addedFeedback, setAddedFeedback] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
   
   // Modals & form state
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
@@ -115,6 +119,8 @@ export default function ProductDetails() {
       size: selectedSize,
       quantity
     });
+    setAddedFeedback(true);
+    setTimeout(() => setAddedFeedback(false), 1100);
   };
 
   const handleStockNotifySubmit = (e) => {
@@ -246,15 +252,18 @@ export default function ProductDetails() {
 
             {/* Favorite & Share Buttons */}
             <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
-              <button
+              <motion.button
                 onClick={() => toggleFavorite(product.id, product.name)}
-                className={`w-11 h-11 rounded-full flex items-center justify-center backdrop-blur-md transition-all shadow-sm ${
+                whileTap={shouldReduceMotion ? {} : { scale: 0.88 }}
+                animate={isFav && !shouldReduceMotion ? { scale: [1, 1.22, 1] } : { scale: 1 }}
+                transition={{ duration: 0.2 }}
+                className={`w-11 h-11 rounded-full flex items-center justify-center backdrop-blur-md transition-colors shadow-sm ${
                   isFav ? 'bg-[#9C5550] text-[#FFFDFC]' : 'bg-[#FFFDFC]/90 text-[#313851] hover:text-[#9C5550]'
                 }`}
                 aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
               >
                 <Heart className={`w-5 h-5 ${isFav ? 'fill-[#FFFDFC]' : ''}`} />
-              </button>
+              </motion.button>
               <button
                 onClick={() => {
                   navigator.clipboard?.writeText(window.location.href);
@@ -447,24 +456,40 @@ export default function ProductDetails() {
 
               {/* Main Action Button */}
               {inStock ? (
-                <button
+                <motion.button
                   onClick={handleAddToCart}
-                  className="flex-1 py-3.5 px-6 rounded-full font-medium text-sm text-[#FFFDFC] flex items-center justify-center gap-2 shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all"
+                  whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}
+                  whileHover={shouldReduceMotion ? {} : { y: -2, scale: 1.01, boxShadow: '0 10px 24px rgba(183, 127, 123, 0.22)' }}
+                  transition={{ duration: 0.18 }}
+                  className="relative overflow-hidden flex-1 py-3.5 px-6 rounded-full font-medium text-sm text-[#FFFDFC] flex items-center justify-center gap-2 shadow-sm transition-colors"
                   style={{
-                    background: 'linear-gradient(135deg, #B26661 0%, #9C5550 55%, #8A4743 100%)'
+                    background: addedFeedback
+                      ? '#2F7C56'
+                      : 'linear-gradient(135deg, #B26661 0%, #9C5550 55%, #8A4743 100%)'
                   }}
                 >
-                  <ShoppingBag className="w-4 h-4" />
-                  <span>Add to Bag • ₹{(currentPrice * quantity).toLocaleString('en-IN')}</span>
-                </button>
+                  {addedFeedback ? (
+                    <>
+                      <Check className="w-4 h-4 animate-in zoom-in-50 duration-150" />
+                      <span>Added ✓</span>
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingBag className="w-4 h-4" />
+                      <span>Add to Bag • ₹{(currentPrice * quantity).toLocaleString('en-IN')}</span>
+                    </>
+                  )}
+                </motion.button>
               ) : (
-                <button
+                <motion.button
                   onClick={() => setIsNotifyOpen(true)}
+                  whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}
+                  whileHover={shouldReduceMotion ? {} : { y: -2 }}
                   className="flex-1 py-3.5 px-6 rounded-full font-medium text-sm text-[#FFFDFC] bg-[#262D42] hover:bg-[#313851] flex items-center justify-center gap-2 shadow-sm transition-all"
                 >
                   <Bell className="w-4 h-4 text-[#C8A46A]" />
                   <span>Notify Me When Back in Stock</span>
-                </button>
+                </motion.button>
               )}
             </div>
 
@@ -722,50 +747,66 @@ export default function ProductDetails() {
       />
 
       {/* NOTIFY ME MODAL */}
-      {isNotifyOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#262D42]/60 backdrop-blur-sm">
-          <div className="bg-[#FFFDFC] rounded-3xl p-6 sm:p-8 max-w-md w-full border border-[#D8C6C3] shadow-2xl space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-[#F4ECE6] text-[#793D39] flex items-center justify-center">
-              <Bell className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="font-heading font-medium text-2xl text-[#313851]">
-                Back in Stock Alert
-              </h3>
-              <p className="text-xs text-[#786866] mt-1">
-                Enter your email address. We will notify you immediately once master artists craft the next batch of <strong>{product.name}</strong>.
-              </p>
-            </div>
-
-            <form onSubmit={handleStockNotifySubmit} className="space-y-3">
-              <input
-                type="email"
-                required
-                autoComplete="email"
-                value={notifyEmail}
-                onChange={(e) => setNotifyEmail(e.target.value)}
-                placeholder="Enter your email address"
-                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
-              />
-              <div className="flex gap-2 justify-end">
-                <button
-                  type="button"
-                  onClick={() => setIsNotifyOpen(false)}
-                  className="px-4 py-2 rounded-full text-xs font-medium text-[#786866]"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-full text-xs font-semibold bg-[#9C5550] text-[#FFFDFC]"
-                >
-                  Notify Me
-                </button>
+      <AnimatePresence>
+        {isNotifyOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setIsNotifyOpen(false)}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#262D42]/60 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, scale: 0.97, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: 8 }}
+              transition={{ duration: 0.22 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#FFFDFC] rounded-3xl p-6 sm:p-8 max-w-md w-full border border-[#D8C6C3] shadow-2xl space-y-4"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-[#F4ECE6] text-[#793D39] flex items-center justify-center">
+                <Bell className="w-6 h-6" />
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+              <div>
+                <h3 className="font-heading font-medium text-2xl text-[#313851]">
+                  Back in Stock Alert
+                </h3>
+                <p className="text-xs text-[#786866] mt-1">
+                  Enter your email address. We will notify you immediately once master artists craft the next batch of <strong>{product.name}</strong>.
+                </p>
+              </div>
+
+              <form onSubmit={handleStockNotifySubmit} className="space-y-3">
+                <input
+                  type="email"
+                  required
+                  autoComplete="email"
+                  value={notifyEmail}
+                  onChange={(e) => setNotifyEmail(e.target.value)}
+                  placeholder="Enter your email address"
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#D8C6C3] bg-[#F6F3ED] text-[#313851] placeholder-[#8B7774] focus:bg-[#FFFDFC] focus:outline-none focus:ring-1 focus:ring-[#9C5550]"
+                />
+                <div className="flex gap-2 justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setIsNotifyOpen(false)}
+                    className="px-4 py-2 rounded-full text-xs font-medium text-[#786866]"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 rounded-full text-xs font-semibold bg-[#9C5550] text-[#FFFDFC]"
+                  >
+                    Notify Me
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

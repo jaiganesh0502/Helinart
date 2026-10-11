@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth, ADMIN_EMAIL } from '../../context/AuthContext';
 import { Lock, Mail, ArrowRight, ShieldCheck, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import SEO from '../../components/SEO';
+import { motion } from 'motion/react';
 
 export default function AdminLogin() {
   const { signIn, signOut, user } = useAuth();
@@ -64,7 +65,12 @@ export default function AdminLogin() {
         description="Authorized administrator sign in for the Nailsbyhelina Atelier management portal."
       />
 
-      <div className="max-w-md w-full bg-[#FFFDFC] p-8 sm:p-10 rounded-3xl border border-[#D8C6C3] shadow-md">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.985, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        className="max-w-md w-full bg-[#FFFDFC] p-8 sm:p-10 rounded-3xl border border-[#D8C6C3] shadow-md"
+      >
         
         {/* Brand Header */}
         <div className="text-center space-y-2">
@@ -143,10 +149,13 @@ export default function AdminLogin() {
               </div>
             </div>
 
-            <button
+            <motion.button
+              whileHover={{ y: -2, scale: 1.01 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ duration: 0.18 }}
               type="submit"
               disabled={submitting}
-              className="w-full py-3.5 rounded-full bg-[#262D42] hover:bg-[#1E2333] text-[#FFFDFC] text-sm font-semibold tracking-wide shadow-xs hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+              className="w-full py-3.5 rounded-full bg-[#262D42] hover:bg-[#1E2333] text-[#FFFDFC] text-sm font-semibold tracking-wide shadow-xs hover:shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-70 group"
             >
               {submitting ? (
                 <span className="flex items-center gap-2">
@@ -156,10 +165,10 @@ export default function AdminLogin() {
               ) : (
                 <>
                   <span>Sign In to Admin Portal</span>
-                  <ArrowRight className="w-4 h-4 text-[#C8A46A]" />
+                  <ArrowRight className="w-4 h-4 text-[#C8A46A] transition-transform duration-200 group-hover:translate-x-1" />
                 </>
               )}
-            </button>
+            </motion.button>
           </form>
 
           {/* Return link */}
@@ -170,7 +179,7 @@ export default function AdminLogin() {
           </div>
         </div>
 
-      </div>
+      </motion.div>
     </div>
   );
 }

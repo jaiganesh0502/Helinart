@@ -7,8 +7,10 @@ import {
 import { useStore } from '../store/useStore';
 import RecentlyViewedRow from '../components/RecentlyViewedRow';
 import ProductCard from '../components/ProductCard';
+import ProductGrid from '../components/ui/ProductGrid';
 import { products } from '../data/products';
 import SEO from '../components/SEO';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -345,11 +347,11 @@ export default function Cart() {
                 </Link>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <ProductGrid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                 {popularPicks.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
-              </div>
+              </ProductGrid>
             </div>
           )}
         </div>
@@ -414,82 +416,92 @@ export default function Cart() {
         
         {/* LEFT COLUMN: Items List */}
         <div className="lg:col-span-8 space-y-4">
-          {cart.map((item, index) => (
-            <div
-              key={`${item.product.id}-${item.shape}-${item.size}-${index}`}
-              className="p-4 sm:p-6 rounded-3xl bg-[#FFFDFC] border border-[#D8C6C3] shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
-            >
-              <div className="flex items-center gap-4">
-                {/* 4:5 Image */}
-                <Link
-                  to={`/product/${item.product.id}`}
-                  className="w-20 h-24 sm:w-24 sm:h-28 rounded-2xl overflow-hidden bg-[#F4ECE6] shrink-0 border border-[#D8C6C3]/60"
-                >
-                  <img
-                    src={item.product.image}
-                    alt={item.product.name}
-                    className="w-full h-full object-cover"
-                  />
-                </Link>
+          <AnimatePresence initial={false}>
+            {cart.map((item, index) => (
+              <motion.div
+                key={`${item.product.id}-${item.shape}-${item.size}-${index}`}
+                layout
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.2 } }}
+                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                className="p-4 sm:p-6 rounded-3xl bg-[#FFFDFC] border border-[#D8C6C3] shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+              >
+                <div className="flex items-center gap-4">
+                  {/* 4:5 Image */}
+                  <Link
+                    to={`/product/${item.product.id}`}
+                    className="w-20 h-24 sm:w-24 sm:h-28 rounded-2xl overflow-hidden bg-[#F4ECE6] shrink-0 border border-[#D8C6C3]/60 group"
+                  >
+                    <img
+                      src={item.product.image}
+                      alt={item.product.name}
+                      loading="lazy"
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  </Link>
 
-                <div className="space-y-1">
-                  <span className="text-[11px] font-medium text-[#793D39] px-2 py-0.5 rounded-md bg-[#F4ECE6] border border-[#D8C6C3]">
-                    {item.product.category}
-                  </span>
-                  <h3 className="font-heading font-medium text-lg sm:text-xl text-[#313851]">
-                    <Link to={`/product/${item.product.id}`} className="hover:text-[#9C5550] transition-colors">
-                      {item.product.name}
-                    </Link>
-                  </h3>
-                  <div className="text-xs text-[#786866] flex flex-wrap gap-2 pt-0.5">
-                    <span>Shape: <strong>{item.shape}</strong></span>
-                    <span>•</span>
-                    <span>Size: <strong>{item.size}</strong></span>
+                  <div className="space-y-1">
+                    <span className="text-[11px] font-medium text-[#793D39] px-2 py-0.5 rounded-md bg-[#F4ECE6] border border-[#D8C6C3]">
+                      {item.product.category}
+                    </span>
+                    <h3 className="font-heading font-medium text-lg sm:text-xl text-[#313851]">
+                      <Link to={`/product/${item.product.id}`} className="hover:text-[#9C5550] transition-colors">
+                        {item.product.name}
+                      </Link>
+                    </h3>
+                    <div className="text-xs text-[#786866] flex flex-wrap gap-2 pt-0.5">
+                      <span>Shape: <strong>{item.shape}</strong></span>
+                      <span>•</span>
+                      <span>Size: <strong>{item.size}</strong></span>
+                    </div>
+                    <div className="font-heading font-semibold text-base text-[#262D42] pt-1">
+                      ₹{item.product.price.toLocaleString('en-IN')}
+                    </div>
                   </div>
-                  <div className="font-heading font-semibold text-base text-[#262D42] pt-1">
-                    ₹{item.product.price.toLocaleString('en-IN')}
+                </div>
+
+                {/* Quantity Controls & Remove */}
+                <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-3 pt-2 sm:pt-0 border-t sm:border-0 border-[#D8C6C3]/60">
+                  <div className="flex items-center border border-[#D8C6C3] rounded-xl bg-[#F6F3ED] p-0.5">
+                    <button
+                      onClick={() => updateCartQuantity(index, item.quantity - 1)}
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-[#313851] hover:bg-[#FFFDFC] transition-colors"
+                      aria-label="Decrease quantity"
+                    >
+                      -
+                    </button>
+                    <span className="w-8 text-center text-xs font-semibold text-[#313851]">
+                      {item.quantity}
+                    </span>
+                    <button
+                      onClick={() => updateCartQuantity(index, item.quantity + 1)}
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-[#313851] hover:bg-[#FFFDFC] transition-colors"
+                      aria-label="Increase quantity"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span className="font-heading font-semibold text-base text-[#313851] sm:hidden">
+                      ₹{(item.product.price * item.quantity).toLocaleString('en-IN')}
+                    </span>
+                    <motion.button
+                      whileHover={{ scale: 1.08 }}
+                      whileTap={{ scale: 0.94 }}
+                      onClick={() => removeFromCart(index)}
+                      className="p-1.5 text-[#786866] hover:text-[#9C5550] transition-colors"
+                      aria-label={`Remove ${item.product.name} from cart`}
+                      title="Remove item"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </motion.button>
                   </div>
                 </div>
-              </div>
-
-              {/* Quantity Controls & Remove */}
-              <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-3 pt-2 sm:pt-0 border-t sm:border-0 border-[#D8C6C3]/60">
-                <div className="flex items-center border border-[#D8C6C3] rounded-xl bg-[#F6F3ED] p-0.5">
-                  <button
-                    onClick={() => updateCartQuantity(index, item.quantity - 1)}
-                    className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-[#313851] hover:bg-[#FFFDFC] transition-colors"
-                    aria-label="Decrease quantity"
-                  >
-                    -
-                  </button>
-                  <span className="w-8 text-center text-xs font-semibold text-[#313851]">
-                    {item.quantity}
-                  </span>
-                  <button
-                    onClick={() => updateCartQuantity(index, item.quantity + 1)}
-                    className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-[#313851] hover:bg-[#FFFDFC] transition-colors"
-                    aria-label="Increase quantity"
-                  >
-                    +
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <span className="font-heading font-semibold text-base text-[#313851] sm:hidden">
-                    ₹{(item.product.price * item.quantity).toLocaleString('en-IN')}
-                  </span>
-                  <button
-                    onClick={() => removeFromCart(index)}
-                    className="p-1.5 text-[#786866] hover:text-[#9C5550] transition-colors"
-                    aria-label={`Remove ${item.product.name} from cart`}
-                    title="Remove item"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+              </motion.div>
+            ))}
+          </AnimatePresence>
 
           {/* Sizing Kit Banner if ordering press-ons */}
           <div className="p-4 rounded-2xl bg-[#F4ECE6] border border-[#D8C6C3] flex items-center justify-between gap-3 text-xs">
@@ -586,16 +598,19 @@ export default function Cart() {
             </div>
 
             {/* Checkout CTA */}
-            <button
+            <motion.button
+              whileHover={{ y: -2, scale: 1.01 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
               onClick={() => navigate('/checkout')}
-              className="w-full py-3.5 rounded-full font-medium text-sm text-[#FFFDFC] flex items-center justify-center gap-2 shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all"
+              className="w-full py-3.5 rounded-full font-medium text-sm text-[#FFFDFC] flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all group"
               style={{
                 background: 'linear-gradient(135deg, #B26661 0%, #9C5550 55%, #8A4743 100%)'
               }}
             >
               <span>Proceed to Checkout</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+              <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
+            </motion.button>
 
             {/* Trust highlights */}
             <div className="pt-2 text-[11px] text-[#786866] space-y-1.5 text-center">

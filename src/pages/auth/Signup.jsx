@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Lock, Mail, User, Phone, AlertCircle, CheckCircle, Send, ArrowRight } from 'lucide-react';
 import SEO from '../../components/SEO';
+import { motion } from 'motion/react';
 
 export default function Signup() {
   const { signUp, resendVerificationEmail } = useAuth();
@@ -81,7 +82,12 @@ export default function Signup() {
         description="Join the Nailsbyhelina atelier to enjoy personalized sizing, order tracking, and exclusive press-on drops."
       />
 
-      <div className="max-w-md w-full space-y-6 bg-[#FFFDFC] p-8 sm:p-10 rounded-3xl border border-[#D8C6C3] shadow-md">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.985, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        className="max-w-md w-full space-y-6 bg-[#FFFDFC] p-8 sm:p-10 rounded-3xl border border-[#D8C6C3] shadow-md"
+      >
         
         {/* Brand Header */}
         <div className="text-center space-y-1.5">
@@ -261,13 +267,16 @@ export default function Signup() {
                 </div>
               </div>
 
-              <button
+              <motion.button
+                whileHover={{ y: -2, scale: 1.01 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.18 }}
                 type="submit"
                 disabled={submitting}
-                className="w-full mt-2 py-3.5 rounded-full bg-gradient-to-r from-[#B26661] via-[#9C5550] to-[#8A4743] text-[#FFFDFC] text-xs font-semibold tracking-wider uppercase shadow-xs hover:shadow-md hover:scale-[1.01] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+                className="w-full mt-2 py-3.5 rounded-full bg-gradient-to-r from-[#B26661] via-[#9C5550] to-[#8A4743] text-[#FFFDFC] text-xs font-semibold tracking-wider uppercase shadow-xs hover:shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-70 group"
               >
                 {submitting ? 'Creating Account...' : 'CREATE ACCOUNT'}
-              </button>
+              </motion.button>
             </form>
 
             <div className="text-center text-xs text-[#786866] pt-2 border-t border-[#D8C6C3]/60">
@@ -279,7 +288,7 @@ export default function Signup() {
           </>
         )}
 
-      </div>
+      </motion.div>
     </div>
   );
 }

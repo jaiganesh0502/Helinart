@@ -2,6 +2,8 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getProducts } from '../api';
 import ProductCard from '../components/ProductCard';
+import ProductGrid from '../components/ui/ProductGrid';
+import Reveal from '../components/ui/Reveal';
 import FilterBar from '../components/FilterBar';
 import EmptyState from '../components/EmptyState';
 import SEO from '../components/SEO';
@@ -125,8 +127,8 @@ export default function Shop() {
         keywords={`shop press on nails, ${selectedCategory !== 'All' ? selectedCategory.toLowerCase() + ', ' : ''}gel nail kits, nailsbyhelina shop, bespoke nail sets`}
       />
       
-      {/* Header Banner */}
-      <div className="mb-8 space-y-2">
+      {/* Header Banner with Smooth Scroll Reveal */}
+      <Reveal y={14} className="mb-8 space-y-2">
         <div className="inline-flex items-center gap-1.5 text-xs font-medium text-[#793D39]">
           <span>The nail wardrobe</span>
         </div>
@@ -136,21 +138,23 @@ export default function Shop() {
         <p className="text-sm sm:text-base text-[#786866] max-w-2xl">
           Explore studio-sculpted reusable sets, DIY professional gel polish kits, high-sparkle Swarovski decals, and strengthening cuticle elixirs.
         </p>
-      </div>
+      </Reveal>
 
       {/* Filter and Search Bar Component */}
-      <FilterBar
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onSelectCategory={handleSelectCategory}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        sortBy={sortBy}
-        onSortChange={setSortBy}
-        totalResults={products.length}
-      />
+      <Reveal y={16} delay={0.04}>
+        <FilterBar
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onSelectCategory={handleSelectCategory}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+          totalResults={products.length}
+        />
+      </Reveal>
 
-      {/* Product Grid Area */}
+      {/* Product Grid Area with Viewport-based Stagger Reveal */}
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
@@ -174,11 +178,11 @@ export default function Shop() {
           onActionClick={handleResetFilters}
         />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <ProductGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
-        </div>
+        </ProductGrid>
       )}
 
     </div>

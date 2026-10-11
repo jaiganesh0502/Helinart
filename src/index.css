@@ -734,5 +734,15 @@ input:focus, select:focus, textarea:focus {
   }
 }
 
+/* 13. Form Input Micro-Interactions */
+input, textarea, select {
+  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease !important;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: #C98F8A !important;
+  box-shadow: 0 0 0 3px rgba(201, 143, 138, 0.14) !important;
+}
+
 
 

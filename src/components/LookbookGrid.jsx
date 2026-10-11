@@ -1,7 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Camera, ArrowUpRight } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
 import { lookbookService } from '../services/lookbookService';
+
+const LUXURY_EASE = [0.22, 1, 0.36, 1];
+
+const gridVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.05
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: {
+    opacity: 0,
+    y: 20,
+    scale: 0.985
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.48,
+      ease: LUXURY_EASE
+    }
+  }
+};
 
 export default function LookbookGrid() {
   const defaultItems = [
@@ -64,6 +94,7 @@ export default function LookbookGrid() {
   ];
 
   const [lookbookItems, setLookbookItems] = useState(defaultItems);
+  const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
     let mounted = true;
@@ -90,21 +121,25 @@ export default function LookbookGrid() {
   return (
     <section id="lookbook" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-24">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+      <motion.div
+        initial={shouldReduceMotion ? {} : { opacity: 0, y: 14 }}
+        whileInView={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.5, ease: LUXURY_EASE }}
+        className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8"
+      >
         <div>
           <div className="inline-flex items-center gap-1.5 text-xs font-medium text-[#793D39] mb-1">
             <Camera className="w-3.5 h-3.5 text-[#9C5550]" />
             <span>As seen on Instagram</span>
           </div>
           <h2 
-            className="font-heading font-medium text-3xl sm:text-4xl"
-            style={{ color: '#313851' }}
+            className="font-heading font-medium text-3xl sm:text-4xl text-[#313851]"
           >
             The Nailsbyhelina Lookbook
           </h2>
           <p 
-            className="text-sm mt-1"
-            style={{ color: '#786866' }}
+            className="text-sm mt-1 text-[#786866]"
           >
             Real manicures, red carpet events, and studio inspirations. Tag @nailsbyhelina to be featured.
           </p>
@@ -114,98 +149,85 @@ export default function LookbookGrid() {
           href="https://www.instagram.com/nails.by.helina/"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 font-medium text-sm transition-colors hover:opacity-80"
-          style={{ color: '#A86F6B' }}
+          className="inline-flex items-center gap-2 font-medium text-sm text-[#A86F6B] hover:text-[#8A4743] transition-colors group"
         >
           <span>Follow @nails.by.helina</span>
-          <ArrowUpRight className="w-4 h-4" />
+          <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </a>
-      </div>
+      </motion.div>
 
-      {/* Grid: 8 items */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+      {/* Grid: 8 items with Staggered Viewport Reveal */}
+      <motion.div
+        variants={gridVariants}
+        initial={shouldReduceMotion ? "visible" : "hidden"}
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.18 }}
+        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"
+      >
         {lookbookItems.map((item) => (
-          <Link
+          <motion.div
             key={item.id}
-            to={`/product/${item.id}`}
-            className="group relative aspect-[4/5] rounded-3xl overflow-hidden bg-[#F4ECE6] border border-[#D8C6C3] shadow-xs hover:shadow-md transition-all duration-300"
+            variants={itemVariants}
+            whileHover={shouldReduceMotion ? {} : { y: -3 }}
+            transition={{ duration: 0.25, ease: LUXURY_EASE }}
+            className="rounded-3xl"
           >
-            <img
-              src={item.image}
-              alt={item.title}
-              loading="lazy"
-              width="300"
-              height="375"
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-            />
-
-            {/* Overlay with original hover fade animation and luxury contrast color combo */}
-            <div 
-              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4"
-              style={{
-                background: 'linear-gradient(180deg, rgba(38,45,66,0.00) 35%, rgba(38,45,66,0.18) 55%, rgba(38,45,66,0.62) 78%, rgba(38,45,66,0.82) 100%)'
-              }}
+            <Link
+              to={`/product/${item.id}`}
+              className="group relative block aspect-[4/5] rounded-3xl overflow-hidden bg-[#F4ECE6] border border-[#D8C6C3] shadow-xs hover:shadow-md transition-shadow duration-300"
             >
-              {/* Small overlay label: color: #E0BC7A with subtle text shadow */}
-              <span 
-                className="text-[11px] font-medium tracking-wide"
-                style={{
-                  color: '#E0BC7A',
-                  textShadow: '0 1px 3px rgba(0,0,0,0.22)'
-                }}
-              >
-                {item.tag}
-              </span>
+              <img
+                src={item.image}
+                alt={item.title}
+                loading="lazy"
+                width="300"
+                height="375"
+                className="w-full h-full object-cover group-hover:scale-[1.025] transition-transform duration-500 ease-out"
+              />
 
-              {/* Main overlay title: color: #FFFDFC, font-weight: 500 with subtle text shadow */}
-              <h4 
-                className="font-heading text-lg leading-tight mt-0.5"
-                style={{
-                  color: '#FFFDFC',
-                  fontWeight: 500,
-                  textShadow: '0 1px 3px rgba(0,0,0,0.22)'
-                }}
-              >
-                {item.title}
-              </h4>
-
-              {/* Card divider line: border-color: rgba(255,255,255,0.28) */}
+              {/* Overlay with smooth hover entrance and micro-movement */}
               <div 
-                className="flex items-center justify-between mt-2 pt-2 border-t"
-                style={{ borderColor: 'rgba(255, 255, 255, 0.28)' }}
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4"
+                style={{
+                  background: 'linear-gradient(180deg, rgba(38,45,66,0.00) 35%, rgba(38,45,66,0.22) 55%, rgba(38,45,66,0.68) 78%, rgba(38,45,66,0.86) 100%)'
+                }}
               >
-                {/* Price: color: #FFFDFC, font-weight: 600 with subtle text shadow */}
+                {/* Small overlay tag */}
                 <span 
-                  className="text-xs"
-                  style={{
-                    color: '#FFFDFC',
-                    fontWeight: 600,
-                    textShadow: '0 1px 3px rgba(0,0,0,0.22)'
-                  }}
+                  className="text-[11px] font-medium tracking-wide text-[#E0BC7A] drop-shadow-xs"
                 >
-                  {item.price}
+                  {item.tag}
                 </span>
 
-                {/* Shop set button with high contrast and smooth hover */}
-                <span 
-                  className="lookbook-shop-btn text-[11px] font-medium px-2.5 py-1 rounded-full flex items-center gap-1 transition-all duration-200"
-                  style={{
-                    background: 'rgba(255, 253, 252, 0.92)',
-                    color: '#313851',
-                    border: '1px solid rgba(255, 255, 255, 0.35)',
-                    backdropFilter: 'blur(6px)',
-                    WebkitBackdropFilter: 'blur(6px)',
-                    textShadow: 'none'
-                  }}
+                {/* Main overlay title with subtle upward glide */}
+                <h4 
+                  className="font-heading text-lg leading-tight mt-0.5 text-[#FFFDFC] font-medium drop-shadow-xs translate-y-1 group-hover:translate-y-0 transition-transform duration-300"
                 >
-                  <span>Shop set</span>
-                  <ArrowUpRight className="w-3 h-3" />
-                </span>
+                  {item.title}
+                </h4>
+
+                {/* Card divider & CTA */}
+                <div 
+                  className="flex items-center justify-between mt-2 pt-2 border-t border-white/30"
+                >
+                  <span 
+                    className="text-xs text-[#FFFDFC] font-semibold drop-shadow-xs"
+                  >
+                    {item.price}
+                  </span>
+
+                  <span 
+                    className="lookbook-shop-btn text-[11px] font-medium px-2.5 py-1 rounded-full flex items-center gap-1 transition-all duration-200 bg-white/95 text-[#313851] border border-white/40 backdrop-blur-xs opacity-90 group-hover:opacity-100 group-hover:scale-[1.02]"
+                  >
+                    <span>Shop set</span>
+                    <ArrowUpRight className="w-3 h-3" />
+                  </span>
+                </div>
               </div>
-            </div>
-          </Link>
+            </Link>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </section>
   );
 }

@@ -5,6 +5,8 @@ import { useStore } from '../store/useStore';
 import { useAuth } from '../context/AuthContext';
 import { getProducts } from '../api';
 import ProductCard from '../components/ProductCard';
+import ProductGrid from '../components/ui/ProductGrid';
+import Reveal from '../components/ui/Reveal';
 import EmptyState from '../components/EmptyState';
 import SEO from '../components/SEO';
 
@@ -44,7 +46,7 @@ export default function Favorites() {
       />
       
       {/* Header with Title and Clear Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-[#D8C6C3]/60">
+      <Reveal y={14} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-[#D8C6C3]/60">
         <div className="space-y-1">
           <div className="inline-flex items-center gap-1.5 text-xs font-medium text-[#793D39]">
             <Heart className="w-3.5 h-3.5 fill-[#9C5550] text-[#9C5550]" />
@@ -81,7 +83,7 @@ export default function Favorites() {
             </Link>
           </div>
         )}
-      </div>
+      </Reveal>
 
       {/* Grid or Empty State */}
       {loading ? (
@@ -106,11 +108,11 @@ export default function Favorites() {
           actionTo="/shop"
         />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <ProductGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {favoritedProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
-        </div>
+        </ProductGrid>
       )}
 
     </div>
